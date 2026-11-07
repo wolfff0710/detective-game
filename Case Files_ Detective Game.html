@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Case Files: Detective Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Work+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a1114;--panel:#121c20;--line:#26373d;--text:#e6e9e4;--mute:#92a3a8;--acc:#5fb8aa;--red:#d4574b;--gold:#e3b95c;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:radial-gradient(1000px 500px at 80% -10%,#15262b,transparent),var(--bg);color:var(--text);font:400 16px/1.55 "Work Sans",system-ui,sans-serif}
+.wrap{max-width:1240px;margin:0 auto;padding:20px 16px 56px}
+h1,h2,h3,.t{font-family:"Special Elite","Courier New",monospace;font-weight:400}
+h1{font-size:clamp(28px,6vw,44px);margin:0;line-height:1.1}
+h2{font-size:19px;margin:0 0 10px}
+.lead{color:var(--mute);max-width:60ch;margin:8px 0 22px}
+.folders{display:grid;gap:18px;grid-template-columns:repeat(3,1fr)}@media(max-width:900px){.folders{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.folders{grid-template-columns:1fr}}
+.folder{position:relative;text-align:left;background:var(--panel);border:1px solid var(--line);border-top:22px solid #1d2f35;border-radius:4px 14px 10px 10px;padding:14px 16px 16px;color:var(--text);cursor:pointer;font:inherit}
+.folder:hover{border-color:var(--acc);transform:translateY(-5px) rotate(-.7deg);box-shadow:0 12px 28px #000b}.folder:hover .stamp{transform:rotate(-9deg) scale(1.1)}.stamp{transition:transform .2s}
+.folder h3{font-size:20px;margin:0 0 4px}
+.folder p{margin:4px 0;color:var(--mute);font-size:14px}
+.stamp{display:inline-block;border:2px solid var(--red);color:var(--red);font-family:"Special Elite",monospace;padding:1px 8px;transform:rotate(-4deg);font-size:13px;margin-top:6px}
+.stamp.new{border-color:var(--mute);color:var(--mute)}
+.top{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.grid{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:820px){.grid{grid-template-columns:3fr 2fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+.sus{display:flex;gap:12px;border-top:1px solid var(--line);padding:12px 0}
+.sus:first-of-type{border-top:0}.sus{transition:background .2s}.sus:hover{background:#16252a}.sus:hover .av{background:var(--acc);color:#0a1114;transform:scale(1.1) rotate(-6deg)}.av{transition:transform .2s,background .2s}
+.av{flex:none;width:42px;height:42px;border-radius:50%;background:#1d2f35;border:1px solid var(--acc);display:grid;place-items:center;font-family:"Special Elite",monospace;color:var(--acc)}
+.sus b{font-family:"Special Elite",monospace;font-weight:400;font-size:17px}
+.sus small{display:block;color:var(--mute)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+button{font:600 14px "Work Sans",sans-serif;color:var(--text);background:transparent;border:1px solid var(--line);border-radius:6px;padding:7px 11px;cursor:pointer}
+button{transition:transform .15s,border-color .15s,background .15s,box-shadow .2s}button:hover{border-color:var(--acc);transform:translateY(-2px);box-shadow:0 5px 16px #000a}button:active{transform:translateY(0)}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+button.done{border-color:var(--acc);color:var(--acc)}
+.back{border:0;color:var(--acc);padding:0}.prof{margin-bottom:20px}.fields{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}label{display:grid;gap:4px;color:var(--mute);font-size:14px}input{background:#0e171a;border:1px solid var(--line);border-radius:6px;color:var(--text);font:inherit;padding:8px 10px}input:focus-visible{outline:2px solid var(--gold);outline-offset:1px}.me{display:flex;gap:14px;align-items:center;flex-wrap:wrap}.me .av{width:56px;height:56px;font-size:24px}.me .info{flex:1;min-width:200px}.me .info b{font-family:"Special Elite",monospace;font-weight:400;font-size:20px}.me .info i{display:block;color:var(--mute)}
+#feed{border-left:3px solid var(--gold);background:#0e171a;min-height:120px}
+#feed h3{font-size:17px;margin:0 0 6px}
+#feed p{margin:0;max-width:70ch}
+#notes{list-style:none;padding:0;margin:0}
+#notes li{padding:8px 10px;border:1px dashed var(--line);border-radius:6px;margin-bottom:8px;font-size:14px}
+#notes li.key{border-color:var(--gold);background:#1a1a12}#notes li{transition:transform .15s;animation:pop .3s}#notes li:hover{transform:translateX(4px)}@keyframes pop{from{opacity:0;transform:translateY(8px)}}
+.mute{color:var(--mute);font-size:14px}
+.acc button{border-color:var(--red);color:var(--red)}
+.acc button:hover{background:var(--red);color:#fff}
+.win{color:#7fd49a}.lose{color:#ef8a7f}[hidden]{display:none!important}.fresh{border-color:var(--gold)!important;animation:pop .4s}.step{margin:10px 0 0;padding:8px 10px;border:1px solid var(--gold);border-radius:6px;background:#1a1a12;font-size:14px}.wrap{padding-top:68px}.wrap{position:relative;z-index:1}body::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(280px circle at var(--mx,50%) var(--my,30%),#5fb8aa18,transparent)}.av{font-size:24px;line-height:1}@keyframes bob{50%{transform:translateY(-5px)}}.fi{font-size:42px;line-height:1.1;animation:bob 3s ease-in-out infinite}.folder:nth-child(3n+1){border-top-color:#2b4a52}.folder:nth-child(3n+2){border-top-color:#4a3d2b}.folder:nth-child(3n){border-top-color:#3d2b4a}.btns [data-e]{background:#efe5c8;color:#2b2415;border-color:#cdbf94;font-family:"Special Elite",monospace;font-size:13px;box-shadow:0 3px 8px #0008}.btns [data-e]:nth-child(odd){transform:rotate(-1.5deg)}.btns [data-e]:nth-child(even){transform:rotate(1.2deg)}.btns [data-e]:hover{transform:rotate(0) translateY(-3px) scale(1.06);border-color:var(--gold)}.btns [data-e].done{opacity:.55;color:#2b2415}.sus .btns button[data-s]{border-radius:14px 14px 14px 2px;background:#10222a}.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);background:var(--gold);color:#1a1405;padding:8px 16px;border-radius:20px;font-weight:600;z-index:30;animation:rise 1.7s forwards}@keyframes rise{0%{opacity:0;transform:translate(-50%,10px)}15%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-10px)}}.cf{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:40}.cf span{position:absolute;top:-40px;animation:fall 2.4s linear forwards}@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}.shake{animation:shk .4s}@keyframes rise2{from{opacity:0;transform:translateY(18px) scale(.98)}}#app .panel,#app h1,#app .lead,.folder{animation:rise2 .5s backwards}.sus{animation:rise2 .4s backwards}.sus:nth-child(3){animation-delay:.08s}.sus:nth-child(4){animation-delay:.16s}.sus:nth-child(5){animation-delay:.24s}.sus:nth-child(6){animation-delay:.32s}#notes li{animation:drop .55s cubic-bezier(.3,1.6,.5,1)}@keyframes drop{from{opacity:0;transform:translateY(-22px) rotate(-5deg) scale(.9)}}@keyframes glow{50%{box-shadow:0 0 14px #e3b95c99}}.fresh{animation:rise2 .5s,glow 1.4s ease-in-out .5s infinite}.sus .av{animation:ring 3.5s ease-in-out infinite}@keyframes ring{50%{box-shadow:0 0 0 6px #5fb8aa22}}.sus .av.talk{animation:jig .5s}.bar{display:none}.pip{display:inline-block;width:14px;height:14px;margin:0 3px;border-radius:50%;border:2px solid var(--line);transition:background .3s,transform .3s,box-shadow .3s}.pip.on{background:var(--gold);border-color:var(--gold);box-shadow:0 0 8px #e3b95c88}.pip:not(.on){transform:scale(.6)}#ap{margin:10px 0 4px}.fl{position:fixed;inset:0;background:#d4574b;opacity:0;pointer-events:none;z-index:35;animation:fl .5s}@keyframes fl{30%{opacity:.28}}.bigstamp{position:fixed;left:50%;top:40%;z-index:50;pointer-events:none;font:400 clamp(30px,10vw,80px) "Special Elite",monospace;border:6px solid;padding:6px 22px;border-radius:8px;white-space:nowrap;animation:slam 2.2s forwards}.bigstamp.ok{color:#7fd49a}.bigstamp.no{color:var(--red)}@keyframes slam{0%{opacity:0;transform:translate(-50%,-50%) scale(4) rotate(-14deg)}15%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-8deg)}20%{transform:translate(-50%,-46%) scale(1.05) rotate(-8deg)}26%{transform:translate(-50%,-50%) scale(1) rotate(-8deg)}85%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-8deg)}100%{opacity:0;transform:translate(-50%,-50%) scale(1) rotate(-8deg)}}#proof{margin-top:10px}#proof button{color:var(--text);border-color:var(--line);font-weight:400;text-align:left}#proof button:hover{background:#24343a;color:var(--text)}#proof .sel{background:var(--gold);color:#1a1405;border-color:var(--gold)}#proof [data-sub]{border-color:var(--red);color:var(--red);font-weight:600}#proof [data-sub]:hover{background:var(--red);color:#fff}@keyframes shk{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}.talk{animation:jig .5s}@keyframes jig{30%{transform:scale(1.25) rotate(-10deg)}60%{transform:scale(1.15) rotate(8deg)}}#pf{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:12px;z-index:20}.pbtn{width:44px;height:44px;border-radius:50%;padding:0;font-family:"Special Elite",monospace;font-size:18px;background:var(--panel);border-color:var(--acc);color:var(--acc)}#pp{position:absolute;right:0;top:54px;width:min(340px,calc(100vw - 24px));background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;box-shadow:0 14px 34px #000c;animation:pop .2s}#pp .prof{margin:0;border:0;padding:4px}#pp .me{gap:10px}
+.bar{height:6px;background:#1d2f35;border-radius:3px;margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--gold);width:0;transition:width .3s}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.folder:hover,button:hover,.sus:hover .av{transform:none!important}}
+</style>
+</head>
+<body>
+<div id="pf"><button class="pbtn" id="pb" data-pt="1" aria-label="Profile">?</button><div id="pp" hidden></div></div>
+<main class="wrap" id="app"></main>
+<script>
+var C=[
+{id:"toast",title:"The Last Toast",place:"Raventhorne Manor, stormy night",level:"Medium",
+intro:"Lord Edmund is dead in his locked study, a glass of brandy beside him. The bridge is flooded, so the killer is still in the house.",
+killer:"julian",keys:["pantry","drug","pocket","decanter"],ST:[["celeste","mehta","glasses","clock"],["victor","dsouza","letter"],["julian","pocket","decanter"]],TR:{"s:mehta:0":{to:1,m:"Digoxin means medical access. Victor and Mrs. Dsouza now come forward, and Mehta’s room can be searched."},"s:victor:1":{to:2,m:"Julian was alone with the decanter. He joins the questioning, and the pantry and his pockets are open."},"w:celeste":{to:1,m:"Celeste’s alibi holds. The staff step forward with what they saw."},"w:mehta":{to:2,m:"Cornered, Mehta blurts that someone else asked him for the drug: Julian."}},H:{pantry:"Who saw the decanter being handled? Speak to the housekeeper privately.",drug:"Someone supplied the poison. Search the doctor’s room, then press him.",pocket:"One suspect hides a hand. Check what he carries.",decanter:"Where did the poison go in? Examine the pantry."},
+win:"Julian asked Mehta for the digoxin, tampered with the brandy decanter and hid the evidence in his pocket. He only meant Edmund to be drowsy at the signing.",
+why:{celeste:"Her lipstick glass is explained and Edmund was alive after she left.",mehta:"He covered up the death but found Edmund already dead.",victor:"He only stole a key and never touched the poison.",dsouza:"She has no motive and no access to the drug."},
+S:[
+{id:"celeste",n:"Lady Celeste",r:"Wife, cut from the new will",a:[
+{q:"The argument",t:"She argued with Edmund at 10:40 and left by 10:45. She heard him lock the door, so he was alive then.",note:"Edmund was alive and locked himself in after 10:45."},
+{q:"The lipstick glass",t:"The lipstick glass is from a toast with Edmund at 9:30 PM, before the argument.",note:"Celeste’s lipstick glass has an innocent explanation."}]},
+{id:"mehta",n:"Dr. Mehta",r:"Family doctor, deep in debt",a:[
+{q:"The poison",t:"It looks like a digitalis overdose. He treats Edmund with digoxin, and his vial is half empty.",note:"Poison is likely digoxin from a doctor’s supply."},
+{q:"Press him with the letter",t:"He breaks down. Julian asked for “something to make Edmund drowsy” at 9 PM and he supplied digoxin. He found Edmund dead at 10:50, panicked and stopped the clock.",note:"Julian asked Mehta for the drug at 9 PM.",key:"drug",need:"letter"}]},
+{id:"victor",n:"Victor",r:"Nephew, gambler, heir",a:[
+{q:"The key",t:"He took the spare key at 8 PM to steal cash, scratched the keyhole and lost his nerve.",note:"Keyhole scratches are Victor’s: theft, not murder."},
+{q:"What he saw",t:"At 9:15 PM he saw Julian alone in the pantry with the brandy decanter.",note:"Julian was alone with the decanter at 9:15 PM."}]},
+{id:"dsouza",n:"Mrs. Dsouza",r:"Housekeeper of 30 years",a:[
+{q:"The clock",t:"It ran fine at 10:30. Someone stopped the pendulum by hand.",note:"The clock was stopped by hand, not run down."},
+{q:"Speak privately",t:"At 9:20 PM she saw Julian wiping the decanter stopper with a handkerchief. He also asked that Edmund be served brandy, not his usual port.",note:"Julian wiped the decanter stopper and steered Edmund to brandy.",key:"pantry"}]},
+{id:"julian",n:"Julian",r:"Business partner, contract dispute",a:[
+{q:"The library",t:"Mehta left the library at 10:50 for ten minutes. Julian heard a muffled argument from the study.",note:"Mehta has a ten minute gap from 10:50."},
+{q:"Look him in the eye",t:"He holds your gaze too steadily and keeps his left hand in his pocket. His right fingertips are stained blue-grey.",note:"Julian’s fingertips are stained and he hides a hand."}]}],
+E:[
+{id:"glasses",n:"Study glasses",t:"The used glass has a bitter residue. The other glass is clean apart from lipstick.",note:"Used glass: bitter residue, consistent with digoxin."},
+{id:"clock",n:"Grandfather clock",t:"Held still by hand. White talc on the rod, like the powder inside latex gloves. Stopped at 10:50.",note:"A gloved hand stopped the clock at 10:50."},
+{id:"letter",n:"Mehta’s room",t:"A letter calls in his debt, due Monday. A second empty digoxin vial is hidden in his shaving kit.",note:"Mehta’s debt was called in and he hid a digoxin vial."},
+{id:"pocket",n:"Julian’s pocket",t:"An empty unlabelled dropper bottle and a handkerchief with the same blue-grey stain.",note:"Julian carried an empty dropper bottle and a stained handkerchief.",key:"pocket"},
+{id:"decanter",n:"Pantry decanter",t:"The brandy stopper has a bitter, chalky film. The port decanter is untouched.",note:"The brandy decanter is contaminated; the port is clean.",key:"decanter"}]},
+{id:"train",title:"Midnight Express",place:"Night train to Delhi",level:"Medium",
+intro:"Diamond dealer Mr. Kapoor is found dead in his locked first-class cabin. His briefcase is empty. The train has not stopped since midnight.",
+killer:"dinesh",keys:["master","case","boots"],ST:[["rhea","sen","cabin"],["dinesh","log"],["pinto","case","boots"]],TR:{"s:sen:1":{to:1,m:"The conductor freed Sen at 1:10 AM. Dinesh and the ticket log are now open."},"e:log":{to:2,m:"The log contradicts Dinesh. The pantry car, luggage van and staff boots are open."},"w:sen":{to:1,m:"Sen’s door was jammed all night. The conductor’s movements need a look."},"w:rhea":{to:1,m:"Rhea’s alibi checks out. The conductor’s rounds are next."}},H:{master:"Who could enter a locked cabin? Ask the conductor about keys.",case:"Where would a thief stash loot on a moving train? Check the luggage.",boots:"The train stopped once outside. Compare the staff’s footwear."},
+win:"Dinesh the conductor used the master key, struck Kapoor and hid the diamonds in the luggage van. Mud from the 1 AM signal halt gave him away.",
+why:{rhea:"She was filming in the dining car all night, on the staff’s own log.",sen:"He argued with Kapoor, but his cabin lock was jammed and he couldn’t get out.",pinto:"The chef never left the pantry car and has no key."},
+S:[
+{id:"dinesh",n:"Dinesh",r:"Train conductor",a:[
+{q:"Night rounds",t:"He says he checked every cabin at midnight and found Kapoor’s door locked. He says he never entered.",note:"Dinesh claims he never entered Kapoor’s cabin."},
+{q:"The master key",t:"He admits only the conductor and the guard hold master keys. His is on his belt, but the guard’s key was ‘lent’ to him earlier for a fuse repair.",note:"Dinesh held two master keys that night.",key:"master"}]},
+{id:"rhea",n:"Rhea",r:"Travel journalist",a:[
+{q:"Her night",t:"She filmed the dining car until 2 AM. Staff logs and her camera timestamp agree.",note:"Rhea’s alibi is backed by staff logs."},
+{q:"Overheard",t:"She heard Kapoor shout “you’ve been watching my case all trip” in the corridor at 12:30 AM.",note:"Kapoor accused someone of watching his case."}]},
+{id:"sen",n:"Mr. Sen",r:"Rival diamond trader",a:[
+{q:"The feud",t:"He admits shouting at Kapoor over a lost deal at 11 PM. He then went to bed.",note:"Sen quarrelled with Kapoor at 11 PM."},
+{q:"His cabin",t:"His door lock jammed and the conductor had to free him at 1:10 AM. He was still inside at the time.",note:"Sen’s door was jammed until 1:10 AM."}]},
+{id:"pinto",n:"Chef Pinto",r:"Pantry car cook",a:[
+{q:"Kitchen log",t:"He was prepping breakfast until 3 AM and never left the pantry car.",note:"Pinto never left the pantry car."},
+{q:"The conductor",t:"He saw Dinesh carry a canvas bag from the luggage van at 1 AM, soaked and muddy.",note:"Dinesh carried a muddy canvas bag at 1 AM."}]}],
+E:[
+{id:"cabin",n:"Kapoor’s cabin",t:"Locked from outside, not inside. A single blow to the head. The briefcase lock was opened with a key, not forced.",note:"Cabin was locked from outside after the blow."},
+{id:"case",n:"Luggage van",t:"A canvas bag hidden behind trunks holds loose diamonds and Kapoor’s briefcase key.",note:"Stolen diamonds were hidden in the luggage van.",key:"case"},
+{id:"boots",n:"Staff boots",t:"Only one pair of boots has red mud from the 1 AM signal halt: Dinesh’s.",note:"Dinesh’s boots carry mud from the 1 AM halt.",key:"boots"},
+{id:"log",n:"Ticket log",t:"The log shows Dinesh opened the cabin at 12:45 AM “for a welfare check”, not at midnight.",note:"Dinesh opened the cabin at 12:45 AM."}]},
+{id:"key",title:"The Missing Answer Key",place:"Greenfield Senior Secondary School",level:"Easy",
+intro:"The Class 12 Chemistry final answer key vanished from the locked staff room overnight. The exam starts at 10 AM.",
+killer:"verma",keys:["envelope","copy","gate"],ST:[["pooja","rohan","lock"],["verma","iyer","cctv"],["copy","gate"]],TR:{"s:pooja:0":{to:1,m:"Verma held the spare key. He and Mrs. Iyer are now available, and the CCTV room is open."},"s:verma:1":{to:2,m:"The envelope slip gives you a thread. The copy shop bin and the gate register are open."},"w:rohan":{to:1,m:"Rohan’s ink doesn’t match. The spare key trail opens."},"w:pooja":{to:1,m:"Pooja returned the key, but she lent it out first. Verma and Mrs. Iyer are now available."}},H:{envelope:"Listen for a detail nobody mentioned. Question Verma about the paper.",copy:"A leak needs copies. Search the bin near the school.",gate:"Who came back at night? Check the register."},
+win:"Mr. Verma photocopied the key for his private tuition clients. He slipped by mentioning the envelope, and the receipt and gate log did the rest.",
+why:{pooja:"Her spare key was returned and gate security logged her exit at 5:32 PM.",rohan:"His ink and handwriting don’t match and he found the room already open.",iyer:"She shares the ink but left at 6 PM and has no copy shop link."},
+S:[
+{id:"verma",n:"Mr. Verma",r:"Head of Department",a:[
+{q:"Thursday afternoon",t:"He left the staff room unlocked at 3:50 PM for a parents’ meeting. He says nobody told him the key was missing.",note:"Verma left the staff room unlocked."},
+{q:"The paper",t:"He mentions it was “sealed in the brown envelope” before anyone told him it was in an envelope.",note:"Verma knew about the envelope without being told.",key:"envelope"}]},
+{id:"pooja",n:"Pooja",r:"Lab assistant, has a spare key",a:[
+{q:"The spare key",t:"She lent it to Verma on Thursday 3 to 5 PM. It was returned with a blue ink smudge on the tag.",note:"Verma borrowed the spare key for two hours."},
+{q:"Her exit",t:"She left at 5:30 PM. The gate security register matches.",note:"Pooja’s exit is on the gate register."}]},
+{id:"rohan",n:"Rohan",r:"Class topper",a:[
+{q:"At 4 PM",t:"He submitted a Physics assignment, found the room unlocked and empty, and left at once.",note:"Rohan found the room unlocked and empty at 4 PM."},
+{q:"His ink",t:"He writes with a blue ballpoint, not fountain-pen ink.",note:"Rohan’s ink doesn’t match the smudge."}]},
+{id:"iyer",n:"Mrs. Iyer",r:"Invigilator",a:[
+{q:"Her complaint",t:"She emailed that the paper was too easy. She left at 6 PM.",note:"Iyer left at 6 PM."},
+{q:"The pen",t:"She gifted Verma his fountain pen last Diwali. Hers is the same ink.",note:"Iyer and Verma use the same fountain-pen ink."}]}],
+E:[
+{id:"lock",n:"Staff room lock",t:"Not forced. The door was left unlocked at some point and re-locked later.",note:"Staff room was unlocked then re-locked, not forced."},
+{id:"copy",n:"Copy shop bin",t:"A receipt dated Thursday 4:15 PM for 14 pages from the shop opposite school, signed in blue-black ink “V”.",note:"A copy shop receipt signed “V” is dated Thursday 4:15 PM.",key:"copy"},
+{id:"gate",n:"Gate register",t:"Mr. Verma is logged back in at 9:40 PM Thursday and out at 9:55 PM.",note:"Verma re-entered the school at 9:40 PM.",key:"gate"},
+{id:"cctv",n:"CCTV room",t:"The corridor camera was switched off at 9 PM using the HOD’s login.",note:"Corridor CCTV was switched off with the HOD’s login."}]}
+];
+C.push({id:"gem",title:"The Stolen Sapphire",place:"City Museum gala night",level:"Medium",
+intro:"The Star of Mumbai sapphire vanished from its display during the gala. The alarm never rang and the case was found locked.",
+killer:"bose",keys:["alarm","fake","loop"],
+ST:[["anita","ghosh","case"],["bose","leo","panel"],["locker","cctv"]],TR:{"s:anita:1":{to:1,m:"Anita told only Bose the code. Bose, Leo and the alarm panel are now open."},"e:panel":{to:2,m:"The alarm was disarmed with a personal code. The security locker and camera room are open."},"s:leo:1":{to:2,m:"Leo saw Bose with a pouch. The locker and camera room are open."},"w:anita":{to:1,m:"Her key never left her bag. Bose, Leo and the alarm panel are now open."}},H:{alarm:"Who can switch off an alarm without forcing anything? Check the alarm panel.",fake:"A thief would swap in a replica. Where might it be kept?",loop:"The cameras showed nothing. Who controls the recordings?"},
+win:"Bose disarmed the alarm with his personal code, looped the camera and swapped in a replica he kept in his locker.",
+why:{anita:"Her case key never left her handbag and her code wasn’t used.",leo:"Guards checked his trays twice and he never entered the display hall.",ghosh:"He is a guest with no alarm code and no access to the security room."},
+S:[
+{id:"bose",n:"Mr. Bose",r:"Head of security",a:[{q:"The alarm",t:"He says nobody could disarm it without the panel code, which only he and the curator hold.",note:"Only Bose and the curator hold the alarm code."},{q:"His rounds",t:"He says he patrolled the east hall from 9 to 9:30 PM, then stood by the case until the theft was found.",note:"Bose claims he patrolled the east hall 9 to 9:30 PM."}]},
+{id:"anita",n:"Anita",r:"Curator",a:[{q:"The display",t:"She locked the case at 7:30 PM and her key stayed in her handbag all night.",note:"Anita’s case key stayed in her handbag."},{q:"The alarm code",t:"She changed her code that morning and told only Bose, who needed it for the gala.",note:"Anita shared her new code with Bose."}]},
+{id:"leo",n:"Leo",r:"Caterer",a:[{q:"Service door",t:"He only restocked trays. A guard stopped him twice and checked his tray.",note:"Leo was checked by a guard twice."},{q:"What he saw",t:"At 9:10 PM he saw Bose leave the security room with a small black pouch.",note:"Leo saw Bose with a black pouch at 9:10 PM."}]},
+{id:"ghosh",n:"Dr. Ghosh",r:"Donor and gem expert",a:[{q:"The stone",t:"He confirmed the sapphire was real at 8 PM and left at 9 PM with the first guests.",note:"Ghosh saw the real stone at 8 PM and left at 9 PM."},{q:"A replica",t:"A convincing replica could only be cut by a specialist workshop. He offers to check any stone you find.",note:"A convincing replica needs a specialist workshop."}]}],
+E:[
+{id:"panel",n:"Alarm panel",t:"The log shows the alarm disarmed at 8:58 PM with the security chief’s personal code, not the curator’s.",note:"The alarm was disarmed at 8:58 PM with Bose’s personal code.",key:"alarm"},
+{id:"locker",n:"Security locker",t:"Behind the uniforms is a black pouch holding a glass replica of the sapphire, cut by a specialist workshop.",note:"A replica sapphire was in Bose’s locker.",key:"fake"},
+{id:"cctv",n:"Camera room",t:"The east hall footage is a 20 second loop, started at 9:00 PM from the security room terminal. The hall was never empty.",note:"East hall footage was a loop made at the security terminal.",key:"loop"},
+{id:"case",n:"Display case",t:"No forced lock. Large glove marks inside and the stand was set down gently.",note:"The case was opened with a key, not forced."}]});
+C.push({id:"fix",title:"The Rigged Final",place:"State cricket final, team hotel",level:"Easy",
+intro:"Hours before the toss, the playing XI leaked to a betting ring. Someone inside the team is working for the bookies.",
+killer:"arvind",keys:["calls","cash","sheet"],
+ST:[["dev","mathur","drawer"],["arvind","tara","print"],["phone","bag"]],TR:{"s:mathur:0":{to:1,m:"Only Arvind holds the drawer key. Arvind, Tara and the printer log are now open."},"e:print":{to:2,m:"The XI was printed from the manager’s laptop. His phone records and kit bag are open."},"s:tara:1":{to:2,m:"Tara overheard a late call. Phone records and kit bags are open."},"w:mathur":{to:1,m:"Mathur’s drawer was never opened. Arvind, Tara and the printer log are now open."}},H:{calls:"Follow the phone. Whose call log looks odd?",cash:"Bookies pay in cash. Check the kit bags.",sheet:"Only a few people saw the sheet early. Who printed it?"},
+win:"Manager Arvind printed the XI early, called the bookie 14 times and hid the payment in his kit bag.",
+why:{dev:"Dev only learned the XI at 8 AM, after the leak.",mathur:"Mathur’s phone is clean and his drawer was never opened.",tara:"Tara was with witnesses and never saw the team sheet."},
+S:[
+{id:"arvind",n:"Arvind",r:"Team manager",a:[{q:"The team sheet",t:"He says the XI is printed at 9 AM sharp, so the leak must have come from the coach’s office.",note:"Arvind blames the coach’s office for the leak."},{q:"His phone",t:"He refuses to show his phone and calls it private.",note:"Arvind refused to show his phone."}]},
+{id:"dev",n:"Dev",r:"Captain",a:[{q:"When he knew",t:"He was told the XI at 8 AM and told nobody. The leak was online by 7:30 AM.",note:"The XI leaked at 7:30 AM, before the captain knew."},{q:"The bookie",t:"A stranger approached him last week. He reported it to Arvind, who told him to ignore it.",note:"Arvind told Dev to ignore the bookie’s approach."}]},
+{id:"mathur",n:"Coach Mathur",r:"Head coach",a:[{q:"The office",t:"The XI was locked in his drawer at 7 AM. Only Arvind holds the spare key.",note:"Only Arvind holds the spare key to the coach’s drawer."},{q:"His calls",t:"He shows his phone: family calls and a pizza order.",note:"Mathur’s phone is clean."}]},
+{id:"tara",n:"Tara",r:"Physio",a:[{q:"Her morning",t:"She treated players in the physio room from 6 to 8 AM with plenty of witnesses.",note:"Tara was with witnesses from 6 to 8 AM."},{q:"Overheard",t:"Last night near the nets she heard Arvind say “the first XI is set, send the money”.",note:"Arvind was overheard saying “the first XI is set, send the money”."}]}],
+E:[
+{id:"phone",n:"Phone records",t:"Arvind’s number called one unregistered number 14 times in 48 hours, including at 7:20 AM.",note:"Arvind called the same unknown number 14 times.",key:"calls"},
+{id:"bag",n:"Kit bags",t:"A sealed envelope of cash is hidden in Arvind’s kit bag, wrapped in a team towel.",note:"A cash envelope was in Arvind’s kit bag.",key:"cash"},
+{id:"print",n:"Printer log",t:"The XI was printed from the manager’s laptop at 7:05 AM.",note:"The XI was printed from Arvind’s laptop at 7:05 AM.",key:"sheet"},
+{id:"drawer",n:"Coach’s drawer",t:"Locked, with dust on the lock. It hasn’t been opened.",note:"The coach’s drawer was never opened."}]});
+C.push({id:"stair",title:"The Confession",place:"Heritage Institute library",level:"Hard",
+intro:"Prof. Menon is found dead at the foot of the library’s main staircase. Within the hour, Dr. Kamal walks in and confesses. The police want to close the file. Do the facts agree?",
+killer:"sharma",keys:["flaw","lift","button","manuscript"],
+ST:[["kamal","raju","stairs"],["meera","pillai","coat","lift"],["sharma","rail","case"]],TR:{"s:kamal:1":{to:1,m:"The confession collapses and Kamal is shielding Meera. Meera, Mrs. Pillai, the cloakroom and the lift log are now open."},"s:meera:1":{to:2,m:"Menon planned to expose Sharma on Monday. Sharma, the railing and his briefcase are now open."},"w:kamal":{to:1,m:"The police hesitate: Kamal’s story has gaps. Meera, Mrs. Pillai, the cloakroom and the lift log are now open."},"w:meera":{to:2,m:"Meera denies it and says Menon was furious at Sharma. Sharma, the railing and his briefcase are now open."}},H:{flaw:"A confession must fit the building. Examine the stairs he named, then press him.",lift:"Who entered the library after Meera left? Check the lift log.",button:"A struggle leaves traces. Examine the staircase railing.",manuscript:"Why would a colleague kill? Search his briefcase."},
+win:"Dr. Sharma had stolen Menon’s manuscript and went back at 9:52 PM to silence him. Kamal’s confession was a false one to shield his student Meera.",
+why:{kamal:"He confessed, but the stairs he named were sealed all night and his coat never left the cloakroom. He is shielding someone.",meera:"She argued with Menon but left at 9:45 and he was alive. The lift log and the cardigan point elsewhere.",pillai:"She only heard a cry from outside and has no motive or access.",raju:"He held the stairs key all night and only saw a man in a cardigan."},
+S:[
+{id:"kamal",n:"Dr. Kamal",r:"Rival professor, confessed",a:[{q:"His confession",t:"He says he pushed Menon from the top of the north stairs at 9:30 PM, wearing his grey coat, then locked up.",note:"Kamal confessed to pushing Menon from the north stairs at 9:30 PM."},{q:"Press the confession",need:"stairs",t:"He wilts. He was never there. He saw Meera leave the library in tears at 9:45 and assumed she had done it, so he confessed to protect her.",note:"Kamal’s confession is false: he is shielding Meera.",key:"flaw"}]},
+{id:"meera",n:"Meera",r:"Menon’s research student",a:[{q:"That night",t:"She argued with Menon over authorship at 9:40 and left in tears by 9:45. He was alive and furious at the top of the main stairs.",note:"Meera left at 9:45 and Menon was still alive."},{q:"Authorship",t:"Menon told her Sharma had “borrowed” his draft, and he planned to expose him on Monday.",note:"Menon planned to expose Sharma on Monday."}]},
+{id:"sharma",n:"Dr. Sharma",r:"Co-author and department rival",a:[{q:"His alibi",t:"He says he left at 9 PM for dinner and never returned. He wears a green cardigan.",note:"Sharma claims he left at 9 PM."},{q:"Confront him with the log",need:"lift",t:"He stiffens, then admits he “went back for a file” and found Menon already fallen. He never called for help.",note:"Sharma admitted returning, but claims Menon was already dead."}]},
+{id:"pillai",n:"Mrs. Pillai",r:"Librarian",a:[{q:"The desk",t:"She closed at 9:15 PM. Lift and card logs sit in her office.",note:"Lift and card logs are kept in Pillai’s office."},{q:"What she heard",t:"At about 9:50 PM, waiting outside for her cab, she heard a muffled cry and thought it was a TV.",note:"A cry was heard at about 9:50 PM."}]},
+{id:"raju",n:"Raju",r:"Night guard",a:[{q:"The stairs",t:"The north staircase has been padlocked for repairs since Monday. He holds the only key and it hung on his hook all night.",note:"The north staircase was locked all night."},{q:"Visitors",t:"He saw a man in a green cardigan take the lift up at about 9:50 PM but didn’t see his face.",note:"A man in a green cardigan took the lift at about 9:50 PM."}]}],
+E:[
+{id:"stairs",n:"North staircase",t:"Padlocked with repair tape and undisturbed dust. Nobody walked these stairs tonight.",note:"The north staircase was sealed, so Kamal’s story is impossible."},
+{id:"coat",n:"Cloakroom",t:"Kamal’s grey coat hangs dry on its hook with the ticket stub still attached.",note:"Kamal’s grey coat never left the cloakroom."},
+{id:"lift",n:"Lift log",t:"Dr. Sharma’s card called the lift to the third floor at 9:52 PM.",note:"Sharma’s card used the lift at 9:52 PM.",key:"lift"},
+{id:"rail",n:"Staircase railing",t:"A green wool button is caught on the railing at the third landing, with a few threads still attached.",note:"A green wool button was caught on the third landing railing.",key:"button"},
+{id:"case",n:"Sharma’s briefcase",t:"Menon’s original manuscript with Sharma’s name pencilled over the title page, and a green cardigan missing a button.",note:"Sharma held Menon’s manuscript and a cardigan missing a button.",key:"manuscript"}]});
+C.push({id:"bank",title:"The Silent Alarm",place:"Union Bank, after hours",level:"Hard",
+intro:"Forty lakh rupees are missing from the vault. The alarm never rang and nothing was forced. Not every odd detail matters, so choose your leads wisely.",
+killer:"nisha",keys:["swipe","dust","slip"],
+H:{swipe:"Who entered after hours? Check the door log.",dust:"The thief left traces in the vault. Examine the floor.",slip:"Money leaves a trail. Search the staff lockers."},
+ST:[["rao","farah","cabinet"],["nisha","imran","doorlog"],["vaultfloor","locker"]],
+TR:{"s:farah:1":{to:1,m:"Someone asked about the vault’s time lock. Nisha, Imran and the door log are now open."},"e:doorlog":{to:2,m:"A swipe after hours. The vault floor and the staff lockers are open."},"w:rao":{to:1,m:"Rao left at 7 PM. The after-hours staff are now open."},"w:farah":{to:1,m:"Farah’s audit shows the vault was full at 5 PM. The after-hours staff are now open."}},
+win:"Nisha swiped in at 7:42 PM, signed out the second vault key as “N. K.”, and wired part of the cash to her brother. Her size 5 sandals left the prints in the vault dust.",
+why:{rao:"He locked up and left at 7 PM. He is nervous about the audit, but that is a different problem.",imran:"He left his post to smoke, but the 7:42 PM swipe wasn’t his card and his shoes are size 10.",farah:"She has no after-hours access and her audit shows the vault was full at 5 PM."},
+S:[
+{id:"rao",n:"Mr. Rao",r:"Branch manager",a:[{q:"Locking up",t:"He locked the vault at 6:30 PM and left at 7 PM. The second vault key stays in the key cabinet.",note:"Vault locked at 6:30 PM; the second key stays in the key cabinet."},{q:"The audit",t:"He admits Farah’s audit flagged problems last month and he has been jumpy ever since.",note:"Rao is under pressure from an audit."}]},
+{id:"nisha",n:"Nisha",r:"Bank teller",a:[{q:"Her evening",t:"She says she left at 6 PM with the other counter staff and went straight home.",note:"Nisha claims she left at 6 PM."},{q:"The deposit",need:"locker",t:"She stammers that it was a bonus, then breaks. She let herself in after hours and only meant to borrow the money.",note:"Nisha made a large transfer to her brother and let herself in after hours."}]},
+{id:"imran",n:"Imran",r:"Security guard",a:[{q:"His rounds",t:"He admits leaving the lobby for 20 minutes around 7:30 PM to smoke behind the building.",note:"Imran left his post for 20 minutes at 7:30 PM."},{q:"The back door",t:"The staff door beeped once after hours, around 7:40 PM. He assumed it was the manager.",note:"The staff door beeped once at about 7:40 PM."}]},
+{id:"farah",n:"Farah",r:"Auditor",a:[{q:"The ledger",t:"The vault total was correct at 5 PM today. She has no after-hours access.",note:"The vault total was correct at 5 PM."},{q:"Overheard",t:"Earlier this week she heard Nisha ask Rao how long the vault time lock takes to release.",note:"Nisha asked about the vault time lock."}]}],
+E:[
+{id:"cabinet",n:"Key cabinet",t:"Unlocked. The logbook shows the second vault key signed out by “N. K.” at 7:45 PM and returned at 8:05 PM.",note:"The second vault key was signed out by “N. K.” at 7:45 PM."},
+{id:"doorlog",n:"Door swipe log",t:"The staff door shows Nisha’s card used at 7:42 PM, long after she says she left.",note:"Nisha’s card opened the staff door at 7:42 PM.",key:"swipe"},
+{id:"vaultfloor",n:"Vault floor",t:"Fine dust holds small sandal prints, about size 5. The manager and the guard both wear far larger shoes.",note:"Size 5 sandal prints were in the vault dust.",key:"dust"},
+{id:"locker",n:"Nisha’s locker",t:"A transfer slip for nine lakh rupees to her brother’s account, and size 5 sandals with vault dust on the soles.",note:"Nisha held a transfer slip and dusty size 5 sandals.",key:"slip"}]});
+C.push({id:"fest",title:"The Fest Fund Fiasco",place:"Annual college fest night",level:"Medium",
+intro:"Fifty thousand rupees vanished from a locked cash box during the fest. The treasurer looks guilty, but looks can deceive.",
+killer:"kabir",keys:["photo","bank","lanyard"],
+H:{photo:"Someone photographed the evening. Ask the volunteer.",bank:"Cash gets moved fast. Check the ATM receipt.",lanyard:"The box was opened with a key. Who keeps keys on a lanyard?"},
+ST:[["aditi","fernandes","box"],["kabir","sana","photo"],["bank","lanyard"]],
+TR:{"s:fernandes:0":{to:1,m:"The spare key left the drawer. Kabir, Sana and her photos are now open."},"e:photo":{to:2,m:"Kabir carried the box out at 9:38 PM. The ATM receipt and his lanyard are now open."},"w:aditi":{to:1,m:"Aditi’s key never left her bag. The spare key trail opens."},"w:sana":{to:2,m:"Sana’s photos clear her and catch someone else on camera. The ATM receipt and the lanyard are open."}},
+win:"Kabir borrowed the spare key, took the box during the quiz break and sent the cash to his cousin. Sana’s photo and the lanyard fibres prove it.",
+why:{aditi:"Her key stayed in her bag all evening and the box was opened with the spare.",fernandes:"He lent the spare key but was at the staff meeting in front of twenty people.",sana:"She never left the auditorium and her own photos prove it."},
+S:[
+{id:"aditi",n:"Aditi",r:"Fest treasurer",a:[{q:"The cash box",t:"She counted fifty thousand into the box at 8:30 PM, locked it, and kept her key in her bag all evening.",note:"Aditi’s key stayed in her bag all evening."},{q:"The spare key",t:"There is one spare. She gave it to the faculty advisor for safekeeping.",note:"The spare key was with the faculty advisor."}]},
+{id:"kabir",n:"Kabir",r:"Fest president",a:[{q:"On stage",t:"He says he hosted the quiz from 9 to 10 PM and found the box empty at 10:15.",note:"Kabir claims he was on stage from 9 to 10 PM."},{q:"Press him",need:"photo",t:"He goes pale. He took the box at the quiz break, planning to repay it from sponsor money on Monday.",note:"Kabir admitted taking the box at the quiz break."}]},
+{id:"fernandes",n:"Mr. Fernandes",r:"Faculty advisor, held spare key",a:[{q:"The spare key",t:"He kept it in his drawer. A student borrowed it at 8:50 PM to pay the sound crew and returned it by 9:50 PM.",note:"A student borrowed the spare key from 8:50 to 9:50 PM."},{q:"His evening",t:"He was in the staff meeting from 8:30 to 10 PM with twenty teachers.",note:"Fernandes was in a staff meeting all evening."}]},
+{id:"sana",n:"Sana",r:"Volunteer photographer",a:[{q:"Her photos",t:"She photographed the whole evening and every photo has a timestamp.",note:"Sana has timestamped photos of the evening."},{q:"Her mood",t:"She was dropped from the core team last week and is still bitter, but never left the auditorium.",note:"Sana was dropped from the core team."}]}],
+E:[
+{id:"box",n:"Cash box",t:"Empty. The padlock was opened with a key, not forced, and there are fresh fabric fibres on the hinge.",note:"The box was opened with a key and left fabric fibres on the hinge."},
+{id:"photo",n:"Sana’s photos",t:"A photo stamped 9:38 PM shows Kabir leaving the back room with a grey box under his jacket, while a stand-in hosts the quiz.",note:"A 9:38 PM photo shows Kabir carrying the box out.",key:"photo"},
+{id:"bank",n:"ATM receipt",t:"A fifty thousand rupee transfer to Kabir’s cousin at 9:41 PM from the ATM beside campus.",note:"Fifty thousand was sent to Kabir’s cousin at 9:41 PM.",key:"bank"},
+{id:"lanyard",n:"Kabir’s lanyard",t:"The spare key hangs from it, and the fibres match those on the box hinge.",note:"Kabir’s lanyard fibres match the box hinge.",key:"lanyard"}]});
+var hints=0,stage=0,score=0,ci=0,ap=0,APT=1,cs=null,found,seen,wrong,over,evs,editing=false;
+var app=document.getElementById("app");
+function best(id){try{return localStorage.getItem("cf_"+id)}catch(e){return null}}
+var RT=["Lucky detective","Sharp detective","Master detective"];function save(id,v){try{var o=localStorage.getItem("cf_"+id);if(!o||RT.indexOf(v)>RT.indexOf(o))localStorage.setItem("cf_"+id,v)}catch(e){}}
+var RANK=["Rookie","Constable","Inspector","Chief Inspector","Commissioner","Legend"];
+function prof(){try{return JSON.parse(localStorage.getItem("cf_profile"))||{}}catch(e){return {}}}
+function saveProf(p){try{localStorage.setItem("cf_profile",JSON.stringify(p))}catch(e){}}
+function esc(s){return String(s||"").replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function gv(i){return document.getElementById(i).value.trim()}
+function profileHtml(){
+ var p=prof(),n=C.filter(function(c){return best(c.id)}).length,m=C.filter(function(c){return best(c.id)=="Master detective"}).length,r=RANK[Math.min(n,RANK.length-1)];
+ var h='';
+ if(editing||!p.name){return h+'<section class="panel prof"><h2>Your detective profile</h2><div class="fields"><label>Name<input id="pn" maxlength="30" value="'+esc(p.name)+'"></label><label>Title or job<input id="pt" maxlength="40" value="'+esc(p.title)+'"></label><label>Favourite subject<input id="ps" maxlength="30" value="'+esc(p.subj)+'"></label><label>Motto<input id="pm" maxlength="60" value="'+esc(p.motto)+'"></label></div><p class="mute">Saved only in this browser on this device. Avoid private details.</p><div class="btns"><button data-save="1">Save profile</button>'+(p.name?'<button data-cancel="1">Cancel</button>':'')+'</div></section>'}
+ return h+'<section class="panel prof me"><div class="av">'+esc(p.name.charAt(0).toUpperCase())+'</div><div class="info"><b>'+esc(p.name)+'</b> <span class="mute">'+r+'</span><i>'+esc([p.title,p.subj].filter(Boolean).join(", "))+'</i>'+(p.motto?'<i>“'+esc(p.motto)+'”</i>':'')+'<span class="mute">Solved '+n+' of '+C.length+'. Master ratings: '+m+'.</span></div><button data-edit="1">Edit profile</button></section>'}
+function home(){
+ var h='<h1>Case Files</h1><p class="lead">Interview suspects, examine evidence, then name the culprit. Every case has one answer and a few key clues.</p><div class="folders">';
+ C.forEach(function(c,i){var b=best(c.id);h+='<button class="folder" data-c="'+i+'" style="animation-delay:'+(i*70)+'ms"><div class="fi">'+(ICON[c.id]||'🔍')+'</div><h3>'+c.title+'</h3><p>'+c.place+'</p><p>'+({Easy:"★☆☆",Medium:"★★☆",Hard:"★★★"})[c.level]+' '+c.level+'</p>'+(b?'<span class="stamp">SOLVED: '+b+'</span>':'<span class="stamp new">OPEN</span>')+'</button>'});
+ app.innerHTML=h+'</div>';cs=null}
+function open(i){
+ cs=C[i];ci=i;found={};seen={};wrong=0;hints=0;stage=0;score=0;over=false;evs={};pres={};ap=APT=Math.round((cs.S.reduce(function(t,s){return t+s.a.length},0)+cs.E.length)*.6);
+ var h='<div class="top"><button class="back" data-home="1">&larr; All cases</button></div><h1>'+(ICON[cs.id]||'🔍')+' '+cs.title+'</h1><p class="lead">'+cs.intro+'</p><div class="grid"><div><section class="panel"><h2>Suspects</h2>';
+ cs.S.forEach(function(s){h+='<div class="sus" data-sid="'+s.id+'"><div class="av">'+ico(s.n+" "+s.r,SI)+'</div><div><b>'+s.n+'</b><small>'+s.r+'</small><div class="btns">';
+  s.a.forEach(function(a,k){h+='<button data-s="'+s.id+'" data-k="'+k+'">'+a.q+'</button>'});h+='</div></div></div>'});
+ h+='</section><section class="panel"><h2>Evidence</h2><div class="btns">';
+ cs.E.forEach(function(e){h+='<button data-e="'+e.id+'">'+ico(e.n,EI)+' '+e.n+'</button>'});
+ h+='</div></section></div><div><section class="panel"><h2>Findings</h2><div id="feed" class="panel"><p class="mute">Choose a question or an evidence item.</p></div></section><section class="panel"><h2>Notebook</h2><ul id="notes"></ul><p id="none" class="mute">Nothing yet.</p><div class="btns"><button data-hint="1">Get a hint</button></div><div class="bar"><i id="bar"></i></div><div id="ap"></div><p class="mute" id="stat"></p></section><section class="panel acc"><h2>Name the culprit</h2><div class="btns">';
+ cs.S.forEach(function(s){h+='<button data-w="'+s.id+'" data-sid="'+s.id+'">'+s.n+'</button>'});
+ h+='</div><div id="proof"></div><p id="verdict" aria-live="polite"></p></section></div></div>';
+ app.innerHTML=h;vis(true);stat();window.scrollTo(0,0)}
+function stat(){drawAP();var n=cs.keys.filter(function(k){return found[k]}).length;document.getElementById("bar").style.width=(n/cs.keys.length*100)+"%";document.getElementById("stat").textContent="Score "+score+"   Lives "+"🔍".repeat(Math.max(0,3-wrong))+"   Hints "+hints+"   Step "+(stage+1)+" of "+(cs.ST?cs.ST.length:1)+"."}
+var ICON={toast:"🥃",train:"🚂",key:"📝",gem:"💎",fix:"🏏",stair:"🪜",bank:"🏦",fest:"🎪"};
+var SI=[[/doctor|physician/,"🩺"],[/wife|lady/,"👩"],[/nephew|gambler/,"🎲"],[/housekeeper/,"🧹"],[/partner/,"💼"],[/conductor/,"🎫"],[/journalist/,"📸"],[/trader/,"💎"],[/cook|chef/,"🍳"],[/head of dep/,"👨‍🏫"],[/lab/,"🧪"],[/topper|student/,"🎒"],[/invigilator/,"📝"],[/curator/,"🖼️"],[/security/,"🛡️"],[/caterer/,"🍽️"],[/donor/,"🎩"],[/manager/,"📋"],[/captain/,"🏏"],[/coach/,"📣"],[/physio/,"💪"],[/rival professor|co-author/,"📚"],[/librarian/,"📖"],[/guard/,"🔦"]];
+var EI=[[/glass/,"🥃"],[/clock/,"🕰️"],[/locker/,"🗄️"],[/lock/,"🔐"],[/cctv|camera/,"📹"],[/cloak/,"🧥"],[/printer/,"🖨️"],[/lift/,"🛗"],[/railing/,"🔩"],[/staircase|stairs/,"🪜"],[/room/,"🚪"],[/pocket/,"🧥"],[/decanter/,"🍷"],[/cabin/,"🛏️"],[/luggage/,"🧳"],[/boots/,"🥾"],[/log|register/,"📒"],[/copy/,"🧾"],[/alarm/,"🚨"],[/display/,"🖼️"],[/phone/,"📱"],[/kit/,"🎒"],[/drawer/,"🗄️"],[/briefcase/,"💼"]];
+function ico(t,L){t=t.toLowerCase();for(var i=0;i<L.length;i++)if(L[i][0].test(t))return L[i][1];return L===SI?"🕵️":"🔎"}
+function toast(m){var t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.remove()},1700)}
+function typeIn(el,t){if(matchMedia("(prefers-reduced-motion:reduce)").matches){el.textContent=t;return}var i=0,id=setInterval(function(){i+=3;el.textContent=t.slice(0,i);if(i>=t.length)clearInterval(id)},14)}
+function confetti(){var d=document.createElement("div");d.className="cf";for(var i=0;i<36;i++){var s=document.createElement("span");s.textContent=["🎉","✨","🔍","⭐","💎"][i%5];s.style.left=Math.random()*100+"%";s.style.animationDelay=Math.random()*.8+"s";s.style.fontSize=(16+Math.random()*18)+"px";d.appendChild(s)}document.body.appendChild(d);setTimeout(function(){d.remove()},3500)}
+function stamp(t,c){var d=document.createElement("div");d.className="bigstamp "+c;d.textContent=t;document.body.appendChild(d);setTimeout(function(){d.remove()},2200)}
+function drawAP(){var e=document.getElementById("ap");if(!e)return;if(e.querySelectorAll(".pip").length!=APT){var h='<span class="mute">Action points </span>';for(var i=0;i<APT;i++)h+='<span class="pip"></span>';e.innerHTML=h}[].forEach.call(e.querySelectorAll(".pip"),function(p,i){p.classList.toggle("on",i<ap)})}
+function presentUI(s,a,k){var ch=Object.keys(evs),f=document.getElementById("feed");if(!ch.length){show(s.n,"He stays calm and denies everything. You have nothing to confront him with yet. Examine the evidence first.");return}f.innerHTML='<h3>Confront '+s.n+'</h3><p>What do you present?</p><div class="btns">'+ch.map(function(id){var e=cs.E.filter(function(x){return x.id==id})[0];return '<button data-ps="'+s.id+'" data-pk="'+k+'" data-pr="'+id+'">'+ico(e.n,EI)+' '+e.n+'</button>'}).join("")+'</div>'}
+function pickProof(id){var s=cs.S.filter(function(x){return x.id==id})[0],ns=Object.keys(seen);if(ns.length<2){toast("Gather at least 2 clues first.");return}document.getElementById("proof").innerHTML='<p class="mute">Accuse <b>'+s.n+'</b>. Pick the 2 clues that prove it:</p><div class="btns">'+ns.map(function(n,i){return '<button data-pf="'+i+'">'+esc(n)+'</button>'}).join("")+'</div><div class="btns"><button data-sub="'+id+'">Submit accusation</button></div>'}
+function shake(){var q=document.createElement("div");q.className="fl";document.body.appendChild(q);setTimeout(function(){q.remove()},600);var a=document.querySelector(".acc");a.classList.remove("shake");void a.offsetWidth;a.classList.add("shake")}
+function talk(b){var a=b.closest(".sus").querySelector(".av");a.classList.remove("talk");void a.offsetWidth;a.classList.add("talk")}
+function vis(init){var ok={};for(var i=0;i<=stage;i++){((cs.ST||[])[i]||[]).forEach(function(x){ok[x]=1})}
+ [].forEach.call(app.querySelectorAll("[data-sid],[data-e]"),function(el){var id=el.dataset.sid||el.dataset.e,sh=!cs.ST||ok[id];if(sh&&el.hidden&&!init)el.classList.add("fresh");el.hidden=!sh})}
+function trig(k){var t=cs.TR&&cs.TR[k];if(t&&stage<t.to){stage=t.to;vis();document.getElementById("feed").insertAdjacentHTML("beforeend",'<p class="step"><b>New development.</b> '+t.m+'</p>');stat()}}
+function renderProf(){var p=prof();document.getElementById("pp").innerHTML=profileHtml();document.getElementById("pb").textContent=p.name?p.name.charAt(0).toUpperCase():"?"}
+function show(t,x,note,key){
+ document.getElementById("feed").innerHTML="<h3>"+t+"</h3><p></p>";typeIn(document.querySelector("#feed p"),x);
+ if(note&&!seen[note]){seen[note]=key||"-";var li=document.createElement("li");li.textContent=note;if(key){found[key]=1}score+=10;toast("+10 Clue noted");document.getElementById("notes").appendChild(li);document.getElementById("none").style.display="none"}
+ stat()}
+function accuse(id,sel){
+ var v=document.getElementById("verdict"),n=cs.keys.filter(function(k){return found[k]}).length;
+ if(id==cs.killer&&sel.every(function(n){return seen[n]&&seen[n]!=="-"})){over=true;var r=n==cs.keys.length&&wrong==0&&hints==0?"Master detective":n>=cs.keys.length-1?"Sharp detective":"Lucky detective";
+  score+=200+100*(3-wrong)+100*n;confetti();stamp("CASE CLOSED","ok");v.className="win";v.textContent="Correct"+(prof().name?", "+prof().name:"")+". "+cs.win+" Rating: "+r+" ("+n+"/"+cs.keys.length+" key clues, "+wrong+" wrong, "+hints+" hints). Score: "+score+".";save(cs.id,r);renderProf()}
+ else{wrong++;score=Math.max(0,score-50);shake();v.className="lose";v.textContent=(cs.why[id]?"Wrong. "+cs.why[id]:"Not enough proof. Choose clues that tie them to the crime.")+" Keep investigating.";trig("w:"+id);if(wrong>=3){over=true;v.textContent="The case went cold. "+(cs.why[id]||"The proof failed.");stamp("COLD CASE","no");v.insertAdjacentHTML("beforeend",' <button data-retry="1">Retry case</button>')}}
+ stat()}
+document.addEventListener("click",function(ev){
+ var pp=document.getElementById("pp");if(!pp.hidden&&!ev.target.closest("#pf"))pp.hidden=true;var b=ev.target.closest("button");if(!b)return;b.classList.remove("fresh");if(b.dataset.pt){pp.hidden=!pp.hidden;return}if(b.dataset.retry){open(ci);return}
+ if(b.dataset.save){saveProf({name:gv("pn"),title:gv("pt"),subj:gv("ps"),motto:gv("pm")});editing=false;renderProf();return}
+ if(b.dataset.edit){editing=true;renderProf();return}
+ if(b.dataset.cancel){editing=false;renderProf();return}
+ if(b.dataset.c!==undefined){open(+b.dataset.c);return}
+ if(b.dataset.home){home();return}
+ if(over)return;
+ if(b.dataset.pr){var s2=cs.S.filter(function(x){return x.id==b.dataset.ps})[0],a2=s2.a[b.dataset.pk];if(b.dataset.pr==a2.need){pres[b.dataset.ps+b.dataset.pk]=1;toast("That hits home!");app.querySelector('[data-s="'+b.dataset.ps+'"][data-k="'+b.dataset.pk+'"]').click()}else{ap=Math.max(0,ap-1);score=Math.max(0,score-15);shake();show(s2.n,"He barely blinks. That proves nothing. (-1 action point)")}return}
+ if(b.dataset.pf){b.classList.toggle("sel");if(document.querySelectorAll("#proof .sel").length>2)b.classList.remove("sel");return}
+ if(b.dataset.sub){var sl=[].map.call(document.querySelectorAll("#proof .sel"),function(x){return x.textContent});if(sl.length!=2){toast("Pick exactly 2 clues.");return}document.getElementById("proof").innerHTML="";accuse(b.dataset.sub,sl);return}
+ if(b.dataset.hint){var k=cs.keys.filter(function(x){return !found[x]})[0];if(ap<2){toast("Hints cost 2 action points.");return}ap-=2;hints++;score=Math.max(0,score-25);toast("-25 score, -2 AP");show("Hint "+hints,k?cs.H[k]:"You have every key clue. Name the culprit.");return}
+ if(b.dataset.s){var s=cs.S.filter(function(x){return x.id==b.dataset.s})[0],a=s.a[b.dataset.k];
+  if(b.classList.contains("done")){show(s.n+": "+a.q,a.t);return}if(ap<=0){toast("No action points left. Make your accusation.");return}if(a.need&&!pres[b.dataset.s+b.dataset.k]){presentUI(s,a,b.dataset.k);return}ap--;
+  b.className="done";talk(b);show(s.n+": "+a.q,a.t,a.note,a.key);trig("s:"+s.id+":"+b.dataset.k)}
+ else if(b.dataset.e){var e=cs.E.filter(function(x){return x.id==b.dataset.e})[0];if(b.classList.contains("done")){show(e.n,e.t);return}if(ap<=0){toast("No action points left. Make your accusation.");return}ap--;evs[e.id]=1;b.className="done";show(e.n,e.t,e.note,e.key);trig("e:"+e.id)}
+ else if(b.dataset.w){pickProof(b.dataset.w)}
+});
+document.addEventListener("pointerout",function(e){var f=e.target.closest&&e.target.closest(".folder");if(f)f.style.transform=""});
+document.addEventListener("pointermove",function(e){var f=e.target.closest&&e.target.closest(".folder");if(f){var r=f.getBoundingClientRect();f.style.transform="perspective(600px) rotateY("+(((e.clientX-r.left)/r.width-.5)*14)+"deg) rotateX("+(-((e.clientY-r.top)/r.height-.5)*10)+"deg) translateY(-4px)"}document.body.style.setProperty("--mx",e.clientX+"px");document.body.style.setProperty("--my",e.clientY+"px")});
+renderProf();if(!prof().name)document.getElementById("pp").hidden=false;home();
+</script>
+</body>
+</html>
