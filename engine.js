@@ -1,6 +1,8 @@
 (function(){
 "use strict";
 var C=window.CASES||[],STORY=window.STORY||{need:4,leads:{}},app=document.getElementById("app"),cs,ci,fl,notes,cur,left=0,bview="cork",tlShown=0,curW="all",shown=0,editing=false,tw=null,
+curId=null,ended=false,face=null,faceKey="",meter=null,epi=null,gal=null,atl=null,tlRows=[],M={},
+AGG=/_(push|hard|order|threat|blunt|bag|blame|denies|shut)$/,SOFT=/_(ask|kind|nice|chat)$/,PRESS=55,
 RANK=["Rookie","Constable","Inspector","Chief Inspector","Legend"],
 TITLES=/^(Dr|Mr|Mrs|Ms|Prof|Lady|Captain|Director|Chef|Maestro|Cook)\.?$/,
 LOGO='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5fb8aa"/><stop offset="1" stop-color="#e3b95c"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="#0a1114"/><circle cx="28" cy="28" r="15" fill="#121c20" stroke="url(#g)" stroke-width="4"/><path d="M19 31c0-6 4-10 9-10s9 4 9 10M22.5 33c0-4.5 2.5-7.5 5.5-7.5s5.5 3 5.5 7.5M26 35c0-2.5.8-4 2-4s2 1.5 2 4" fill="none" stroke="#5fb8aa" stroke-width="2" stroke-linecap="round"/><path d="M39 39l14 14" stroke="#e3b95c" stroke-width="6" stroke-linecap="round"/><circle cx="50" cy="14" r="4" fill="#d4574b"/></svg>';
@@ -46,8 +48,8 @@ function checkAch(ev){var have=ach(),add=[];ACH.forEach(function(a){if(have.inde
 function toast(m){var t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.remove()},1700)}
 function say(m){g("live").textContent=m}
 function stopType(){if(tw){clearInterval(tw.id);tw=null}}
-function skipType(){if(tw){clearInterval(tw.id);tw.el.textContent=tw.t;tw=null}}
-function typeIn(el,t){stopType();if(matchMedia("(prefers-reduced-motion:reduce)").matches){el.textContent=t;return}var i=0;tw={el:el,t:t,id:setInterval(function(){i+=3;if(i>=t.length)skipType();else el.textContent=t.slice(0,i)},14)}}
+function skipType(){if(tw){clearInterval(tw.id);tw.el.textContent=tw.t;var cb=tw.cb;tw=null;if(cb)cb()}}
+function typeIn(el,t,cb){stopType();if(matchMedia("(prefers-reduced-motion:reduce)").matches){el.textContent=t;if(cb)cb();return}var i=0;tw={el:el,t:t,cb:cb,id:setInterval(function(){i+=3;if(i>=t.length)skipType();else el.textContent=t.slice(0,i)},14)}}
 function confetti(){var d=document.createElement("div");d.className="cf";for(var i=0;i<36;i++){var s=document.createElement("span");s.textContent=["🎉","✨","🔍","⭐","💎"][i%5];s.style.left=Math.random()*100+"%";s.style.animationDelay=Math.random()*.8+"s";s.style.fontSize=(16+Math.random()*18)+"px";d.appendChild(s)}document.body.appendChild(d);setTimeout(function(){d.remove()},3500)}
 function stamp(t,c){var d=document.createElement("div");d.className="bigstamp "+c;d.textContent=t;document.body.appendChild(d);setTimeout(function(){d.remove()},2400)}
 function flash(){var q=document.createElement("div");q.className="fl";document.body.appendChild(q);setTimeout(function(){q.remove()},600)}
@@ -78,38 +80,111 @@ function renderTL(still){var el=g("tl"),its=[],out="",from=still?notes.length:tl
  if(its.length>=5)checkAch({chrono:true})}
 function warp(c,fn){if(matchMedia("(prefers-reduced-motion:reduce)").matches){fn();return}var w=document.createElement("div");w.className="warp";w.style.setProperty("--c",worldOf(c).color);document.body.appendChild(w);setTimeout(fn,430);setTimeout(function(){w.remove()},1100)}
 function hud(){var h=g("clk");if(!h)return;if(!cs.moves){h.hidden=true;return}h.hidden=false;h.className="clock"+(left<=2?" low":"");h.innerHTML='<span>⏱ '+left*cs.step+' min '+esc(cs.tl)+'</span><i><b style="width:'+Math.round(left/cs.moves*100)+'%"></b></i>'}
+
+/* ===== case analysis: suspects, scene ownership, culprit, endings (feeds portraits, mood, gallery, epilogues) ===== */
+function rx(n){return new RegExp("\\b"+n.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b")}
+function reach(S,x,seen){if(seen[x])return false;seen[x]=1;var s=S[x];if(!s)return false;if(s.e)return s.k=="win"&&!s.s;
+ var n=[];(s.c||[]).forEach(function(h){n.push(h[1])});(s.r||[]).forEach(function(h){n.push(h[1])});(s.g||[]).slice(1).forEach(function(h){n.push(h[1])});if(s.b)n.push(s.b);
+ return n.some(function(t){return reach(S,t,seen)})}
+function meta(c){if(M[c.id])return M[c.id];
+ var S=c.S,sus={},lab={},who={},talk={},culprit=null,pl=c.place.split(",")[0],ends=[];
+ ((S.accuse||S.maccuse||{}).c||[]).forEach(function(ch){if(!/^(ac|end)_/.test(ch[1]))return;var id=ch[1].replace(/^(ac|end)_/,""),p=ch[0].replace(/\s+(herself|himself)$/,"").split(",");
+  sus[id]={id:id,name:p[0].trim(),role:/^for /.test((p[1]||"").trim())?"":(p[1]||"").trim(),acc:ch[1]};lab[ch[1]]=sus[id]});
+ ((S[c.hub]||{}).c||[]).forEach(function(ch){if(!/^(Talk to|Question|Speak to) /.test(ch[0]))return;var f=null,k=Object.keys(sus);
+  k.forEach(function(i){if(!f&&rx(sus[i].name).test(ch[0]))f=i});
+  if(!f)k.forEach(function(i){if(!f&&rx(sus[i].name.split(" ").pop()).test(ch[0]))f=i});
+  if(f&&!talk[ch[1]])talk[ch[1]]=f});
+ Object.keys(talk).forEach(function(t){var f=talk[t],q=[t];while(q.length){var x=q.shift();if(who[x]||x==c.hub||x=="accuse"||x=="maccuse"||(talk[x]&&talk[x]!=f))continue;who[x]=f;var s=S[x];if(!s||s.e)continue;
+  (s.c||[]).forEach(function(h){q.push(h[1])});(s.r||[]).forEach(function(h){q.push(h[1])});if(s.b)q.push(s.b)}});
+ Object.keys(sus).forEach(function(i){if(!culprit&&/^ac_/.test(sus[i].acc)&&reach(S,sus[i].acc,{}))culprit=i});
+ var cn=culprit?sus[culprit].name:"The culprit";
+ Object.keys(S).forEach(function(id){var s=S[id];if(!s.e)return;var v=id.indexOf("end_")==0?lab[id]:null,
+  type=s.s?"secret":s.k=="win"?"good":s.k=="weak"?"neutral":"bad",hint,lines;
+  if(id=="win_master"){hint="Prove every angle before you accuse.";lines=[{when:"The next morning",text:cn+" is gone, and "+pl+" finally exhales."},{when:"Years later",text:"People still tell the story of the detective who missed nothing."}]}
+  else if(id=="win"){hint="Accuse the culprit with solid, not perfect, evidence.";lines=[{when:"A week later",text:cn+" is out of the picture, though a few loose ends remain."},{when:"Months later",text:"You keep the file closed. Mostly."}]}
+  else if(s.s){hint="A quieter ending exists. Gather enough, then talk instead of accusing.";lines=[{when:"The next morning",text:cn+" is given a second chance, and keeps it."},{when:"Years later",text:"Nobody at "+pl+" remembers the headline. They remember how it ended."}]}
+  else if(id=="timeout"){hint="Don't let the clock run out.";lines=[{when:"Afterwards",text:"Everyone agrees there was no time left, and that you might have found it sooner."},{when:"Years later",text:"You still check the clock first."}]}
+  else if(s.k=="weak"){hint=id=="weak"?"Name the culprit with almost nothing to back it up.":"Right culprit, wrong moment. Don't tip them off.";lines=[{when:"That night",text:cn+" sleeps soundly. You do not."},{when:"Years later",text:"The case at "+pl+" stays open in your head."}]}
+  else{hint="Accuse the wrong person"+(v&&v.role?" ("+v.role+")":"")+".";lines=v?[{when:"The next day",text:v.name+" spends a long time clearing their name."},{when:"A year later",text:cn+" was never looked at twice."}]:[{when:"The next day",text:"The wrong name is already in the headlines."},{when:"A year later",text:cn+" was never looked at twice."}]}
+  ends.push({id:id,title:s.e,type:type,hint:hint,lines:lines})});
+ return M[c.id]={sus:sus,who:who,talk:talk,culprit:culprit,end:ends}}
+
+/* ===== suspect UI: portrait + mood meter ===== */
+function susHead(sid){var s=meta(cs).sus[sid];return '<div class="sus"><div id="fpt"></div><div class="si"><b>'+esc(s.name)+'</b>'+(s.role?'<i>'+esc(s.role)+'</i>':'')+'<div id="fmt"></div></div></div>'}
+function mountSus(sid){var s=meta(cs).sus[sid],k=cs.id+":"+sid;faceKey=k;face=CFPortrait.mount(g("fpt"),{id:k,name:s.name,size:88,mood:CFMood.mood(k)});meter=CFMood.mount(g("fmt"),k,{label:"Composure"})}
+function warn(sid,m){var n=meta(cs).sus[sid].name;return m=="angry"?n+"’s jaw tightens. One more push and they will stop talking.":n+" shifts uncomfortably. Keep pushing and they will stop talking."}
+function clam(sid){var s=meta(cs).sus[sid];g("sc").innerHTML=susHead(sid)+'<p id="txt" aria-hidden="true"></p><div class="ch"><button class="choice" data-to="'+cs.hub+'">'+esc(cs.hl)+'</button></div>';mountSus(sid);var t=s.name+": "+CFMood.clamLine();say(t);typeIn(g("txt"),t)}
+document.addEventListener("cf:mood",function(e){if(face&&e.detail.id==faceKey)face.setMood(e.detail.mood)});
+document.addEventListener("cf:mood-recovered",function(e){var p=e.detail.id.split(":");if(cs&&p[0]==cs.id&&meta(cs).sus[p[1]])toast(meta(cs).sus[p[1]].name+" will talk again")});
+
+/* ===== notebook sync, alibi timeline, save ===== */
+function syncNotes(){var u=g("notes");if(!u)return;while(u.children.length<notes.length){var li=document.createElement("li");li.textContent=notes[u.children.length];u.appendChild(li)}g("none").hidden=notes.length>0;renderBoard()}
+function persist(){if(cs&&!ended&&curId!=null)CFSave.save(cs.id,{cur:curId,fl:fl,notes:notes,left:left,mood:CFMood.export()},{label:notes.length+" clues"})}
+function addNote(t){if(notes.indexOf(t)<0){notes.push(t);syncNotes();persist()}}
+function addStmt(r,k){atl.add({id:cs.id+"#"+k,who:r[1],about:r[2],start:r[3],end:r[4],place:r[5],text:r[6]})}
+document.addEventListener("cf:contradiction",function(e){if(!atl||!cs)return;var a=tlRows[+e.detail.a.split("#")[1]],b=tlRows[+e.detail.b.split("#")[1]];if(!a||!b)return;toast("Contradiction found");addNote("Contradiction: "+a[1]+" and "+b[1]+" disagree about "+a[2]+".")});
+function clearView(){stopType();if(epi){epi.destroy();epi=null}if(meter){meter.destroy();meter=null}if(gal){gal.destroy();gal=null}face=null}
+
 function renderProf(){var p=prof(),e=editing,n=C.filter(wins).length,r=RANK[Math.min(n,RANK.length-1)],en=C.reduce(function(t,c){return t+got(c).length},0),h,hv=ach();
  if(e||!p.name){h='<h2>Your detective profile</h2><div class="fields"><label>Name<input id="pn" maxlength="30" value="'+esc(p.name)+'"></label><label>Title or job<input id="pt" maxlength="40" value="'+esc(p.title)+'"></label><label>Motto<input id="pm" maxlength="60" value="'+esc(p.motto)+'"></label></div><p class="mute">Saved only in this browser. Avoid private details.</p><div class="btns"><button data-save="1">Save profile</button>'+(p.name?'<button data-cancel="1">Cancel</button>':'')+'</div>'}
  else{h='<div class="me"><div class="av">'+esc(p.name.charAt(0).toUpperCase())+'</div><div class="info"><b>'+esc(p.name)+'</b> <span class="mute">'+r+'</span><i>'+esc(p.title)+'</i>'+(p.motto?'<i>“'+esc(p.motto)+'”</i>':'')+'<span class="mute">Cases solved '+n+' of '+C.length+'. Endings found '+en+'.</span></div><button data-edit="1">Edit</button></div>'
  +'<p class="mute">🪶 Raven file: '+leads().length+' of '+nLeads()+' leads</p><h2 class="bh">Badges '+hv.length+' of '+ACH.length+'</h2><div class="badges">'+ACH.map(function(a){var on=hv.indexOf(a.id)>=0;return '<div class="badge'+(on?'':' off')+'"><span>'+(on?a.i:"🔒")+'</span><b>'+esc(a.n)+'</b><small>'+esc(a.d)+'</small></div>'}).join("")+'</div>'}
  g("pp").innerHTML=h;g("pb").textContent=p.name?p.name.charAt(0).toUpperCase():"?"}
 function orb(w){var l=w?w.cases.map(byId).filter(Boolean):C,n=l.filter(wins).length;return '<button class="orb'+((w?w.id:"all")==curW?" on":"")+'" data-w="'+(w?w.id:"all")+'" style="--c:'+(w?w.color:"#5fb8aa")+'"><span class="oi">'+(w?w.icon:"✨")+'</span><b>'+(w?w.name:"All")+'</b><small>'+n+' of '+l.length+' solved</small></button>'}
-function home(){stopType();cs=null;app.style.removeProperty("--acc");renderProf();var lv=leads(),W=STORY.worlds||[],cw=W.filter(function(w){return w.id==curW})[0],list=cw?cw.cases.map(byId).filter(Boolean):C,
- h='<div class="brand">'+LOGO+'<h1>Case Files</h1></div><p class="lead">Every choice branches the story. Question suspects, search rooms, and decide how hard to push: some doors close for good. Find every ending.</p><p class="mute rf">🪶 Raven file: '+lv.length+' of '+nLeads()+' leads. '+(lv.length>=STORY.need?'The final case is open.':'Solve the '+(STORY.need-lv.length)+' remaining connected cases (marked 🪶) to unlock the final case.')+'</p><div class="mv"><div class="orbs">'+orb(null)+W.map(orb).join("")+'</div><p class="wdesc"'+(cw?' style="--c:'+cw.color+'"':'')+'>'+(cw?cw.icon+' <b>'+esc(cw.name)+'</b>. '+esc(cw.desc):'The multiverse holds '+W.length+' universes and '+C.length+' cases. Pick a universe to travel there.')+'</p></div><div class="folders">';
+function idx(id){for(var i=0;i<C.length;i++)if(C[i].id==id)return i;return -1}
+function home(){clearView();cs=null;app.style.removeProperty("--acc");renderProf();var lv=leads(),W=STORY.worlds||[],cw=W.filter(function(w){return w.id==curW})[0],list=cw?cw.cases.map(byId).filter(Boolean):C,titles={},
+ h='<div class="brand">'+LOGO+'<h1>Case Files</h1></div><p class="lead">Every choice branches the story. Question suspects, search rooms, and decide how hard to push: some doors close for good. Find every ending.</p><div id="cont"></div><p class="mute rf">🪶 Raven file: '+lv.length+' of '+nLeads()+' leads. '+(lv.length>=STORY.need?'The final case is open.':'Solve the '+(STORY.need-lv.length)+' remaining connected cases (marked 🪶) to unlock the final case.')+'</p><div class="mv"><div class="orbs">'+orb(null)+W.map(orb).join("")+'</div><p class="wdesc"'+(cw?' style="--c:'+cw.color+'"':'')+'>'+(cw?cw.icon+' <b>'+esc(cw.name)+'</b>. '+esc(cw.desc):'The multiverse holds '+W.length+' universes and '+C.length+' cases. Pick a universe to travel there.')+'</p></div><div class="folders">';
+ C.forEach(function(c){titles[c.id]=c.title});
  list.forEach(function(c,i){var lk=lockMsg(c),ld=STORY.leads[c.id],wd=worldOf(c);h+='<button class="folder'+(lk?' locked':'')+'" data-c="'+C.indexOf(c)+'" style="animation-delay:'+(i*80)+'ms;border-top-color:'+wd.color+'"><div class="fi">'+(lk?'🔒':c.icon)+'</div><h3>'+c.title+'</h3><p>'+c.place+'</p><p>'+wd.icon+' '+wd.name+' · '+c.level+(c.moves?' · ⏱ '+c.moves*c.step+' min':'')+'</p>'+(lk?'<p>'+esc(lk)+'</p>':'<p>Endings found: '+nsf(c)+' of '+total(c)+(sf(c)?' ★ secret found':'')+'</p>')+(ld?'<p>🪶 Connected to the final case: '+(lv.indexOf(c.id)>=0?'solved':'not yet')+'</p>':'')+(lk?'<span class="stamp new">LOCKED</span>':wins(c)?'<span class="stamp">SOLVED</span>':'<span class="stamp new">OPEN</span>')+'</button>'});
- app.innerHTML=h+'</div>'}
-function openCase(i){stopType();cs=C[i];ci=i;fl={};notes=[];shown=0;tlShown=0;bview="cork";cur=null;left=cs.moves||0;app.style.setProperty("--acc",worldOf(cs).color);st("cf2_att_"+cs.id,att(cs)+1);
- if(cs.boss)leads().forEach(function(id){var L=STORY.leads[id];if(L){fl["lead_"+id]=1;notes.push(L.n)}});
- app.innerHTML='<div class="top"><button class="back" data-home="1">← All cases</button><button class="back" data-restart="1">↺ Restart</button></div><h1>'+cs.icon+' '+cs.title+'</h1><div class="grid"><section class="panel" id="sc"></section><section class="panel"><div class="clock" id="clk" hidden></div><h2>Notebook</h2><button class="bbtn" data-board="1">📌 Board &amp; timeline</button><ul id="notes"></ul><p id="none" class="mute">No clues yet.</p></section></div><section class="panel board" id="board" hidden><div class="tabs"><button class="on" data-view="cork">📌 Evidence board</button><button data-view="tl">🕒 Timeline</button></div><p class="mute" id="bstat"></p><div class="cork" id="cork"><svg id="strings" aria-hidden="true"></svg><div id="pins"></div></div><div class="tline" id="tl" hidden></div></section>';
- window.scrollTo(0,0);go(cs.start)}
-function go(id){stopType();var sc=cs.S[id];fl["v_"+id]=1;
+ app.innerHTML=h+'</div><p><button class="back" data-gal="1">★ Ending gallery</button></p>';
+ CFSave.mountContinue(g("cont"),{titles:titles,onResume:function(id,sv){var i=idx(id);if(i>=0)openCase(i,sv)}})}
+function gallery(){clearView();cs=null;app.style.removeProperty("--acc");app.innerHTML='<div class="top"><button class="back" data-home="1">← All cases</button></div><h1>Ending gallery</h1><p class="lead">Every case hides several endings. Locked ones show as silhouettes with a hint.</p><div id="gal"></div>';gal=CFEndings.mount(g("gal"));window.scrollTo(0,0)}
+function openCase(i,sv){clearView();cs=C[i];ci=i;ended=false;if(sv&&!cs.S[sv.cur])sv=null;
+ fl=sv?sv.fl:{};notes=sv?sv.notes:[];shown=0;tlShown=0;bview="cork";cur=null;curId=null;left=sv&&sv.left!=null?sv.left:(cs.moves||0);
+ app.style.setProperty("--acc",worldOf(cs).color);if(!sv)st("cf2_att_"+cs.id,att(cs)+1);
+ CFMood.reset();if(sv)CFMood.import(sv.mood);
+ if(cs.boss&&!sv)leads().forEach(function(id){var L=STORY.leads[id];if(L){fl["lead_"+id]=1;notes.push(L.n)}});
+ var T=(window.CF_TL||{})[cs.id];tlRows=T||[];
+ app.innerHTML='<div class="top"><button class="back" data-home="1">← All cases</button><button class="back" data-restart="1">↺ Restart</button></div><h1>'+cs.icon+' '+cs.title+'</h1><div class="grid"><section class="panel" id="sc"></section><section class="panel"><div class="clock" id="clk" hidden></div><h2>Notebook</h2><button class="bbtn" data-board="1">📌 Board &amp; timeline</button><ul id="notes"></ul><p id="none" class="mute">No clues yet.</p></section></div>'+(T?'<section class="panel" id="tlp"></section>':'')+'<section class="panel board" id="board" hidden><div class="tabs"><button class="on" data-view="cork">📌 Evidence board</button><button data-view="tl">🕒 Timeline</button></div><p class="mute" id="bstat"></p><div class="cork" id="cork"><svg id="strings" aria-hidden="true"></svg><div id="pins"></div></div><div class="tline" id="tl" hidden></div></section>';
+ atl=T?CFTimeline.mount(g("tlp"),[],{title:"Alibi timeline"}):null;
+ if(sv&&atl)tlRows.forEach(function(r,k){if(fl["v_"+r[0]])addStmt(r,k)});
+ window.scrollTo(0,0);go(sv?sv.cur:cs.start,{restore:!!sv})}
+function go(id,o){o=o||{};stopType();if(epi){epi.destroy();epi=null}if(meter){meter.destroy();meter=null}face=null;
+ var m=meta(cs),sc=cs.S[id],sid=m.who[id],key=sid?cs.id+":"+sid:null;
+ if(sid&&!o.restore&&!o.pre){
+  if(!CFMood.canAsk(key))return clam(sid);
+  if(AGG.test(id)&&curId){var r=CFMood.push(key,PRESS);if(!r.justClammed)return go(curId,{pre:warn(sid,r.mood)})}
+  else if(SOFT.test(id))CFMood.push(key,-8)}
+ fl["v_"+id]=1;
  if(sc.r)for(var i=0;i<sc.r.length;i++)if(has(sc.r[i][0]))return go(sc.r[i][1]);
  if(sc.g){var n=sc.g[0].filter(function(x){return fl[x]}).length;for(var j=1;j<sc.g.length;j++)if(n>=sc.g[j][0])return go(sc.g[j][1])}
+ if(!o.restore&&!o.pre)CFMood.tick(key);
  setf(sc.f);
  if(sc.n&&notes.indexOf(sc.n)<0){notes.push(sc.n);toast("Clue noted")}
- var u=g("notes");while(u.children.length<notes.length){var li=document.createElement("li");li.textContent=notes[u.children.length];u.appendChild(li)}
- g("none").hidden=notes.length>0;renderBoard();cur=sc;hud();
+ syncNotes();cur=sc;hud();
+ if(atl)tlRows.forEach(function(r,k){if(r[0]==id)addStmt(r,k)});
  if(sc.e)return ending(sc,id);
+ curId=id;
  var ch=(sc.c||[]).filter(function(c){return has(c[2])});
  if(sc.b)ch=ch.concat([[sc.b==cs.hub?cs.hl:"Go back",sc.b]]);
- g("sc").innerHTML='<div class="ic" aria-hidden="true">'+(sc.i||cs.icon)+'</div><p id="txt" aria-hidden="true"></p><div class="ch">'+ch.map(function(c,k){return '<button class="choice" style="animation-delay:'+(350+k*90)+'ms" data-to="'+c[1]+'" data-set="'+(c[3]||"")+'">'+esc(c[0])+'</button>'}).join("")+'</div>';
- say(sc.t);typeIn(g("txt"),sc.t)}
+ g("sc").innerHTML=(sid?susHead(sid):'<div class="ic" aria-hidden="true">'+(sc.i||cs.icon)+'</div>')+'<p id="txt" aria-hidden="true"></p><div class="ch">'+ch.map(function(c,k){
+  var ts=m.who[c[1]];
+  if(ts&&!CFMood.canAsk(cs.id+":"+ts))return '<button class="choice" disabled style="animation-delay:'+(350+k*90)+'ms">'+esc(c[0])+' · clammed up</button>';
+  return '<button class="choice" style="animation-delay:'+(350+k*90)+'ms" data-to="'+c[1]+'" data-set="'+(c[3]||"")+'">'+esc(c[0])+'</button>'}).join("")+'</div>';
+ if(sid)mountSus(sid);
+ if(sid&&AGG.test(id)&&!CFMood.canAsk(key))delete fl["v_"+id];
+ var t=o.pre?o.pre+"\n\n"+sc.t:sc.t;
+ say(t);typeIn(g("txt"),t);persist()}
 function ending(sc,id){var d=got(cs),co=STORY.leads[cs.id],win=sc.k=="win",nl=false,clean;
+ ended=true;CFSave.clear(cs.id);
  if(d.indexOf(id)<0){d.push(id);st("cf2_"+cs.id,d)}
+ CFEndings.unlock(cs.id,id);
  if(win&&co)nl=addLead(cs.id);
  if(win){confetti();stamp(sc.s?"SECRET ENDING":"CASE CLOSED","ok")}else{flash();stamp(sc.k=="weak"?"NO CONVICTION":"WRONG CALL","no")}
- g("sc").innerHTML='<div class="ic" aria-hidden="true">'+(sc.i||"🏁")+'</div><h2>'+esc(sc.e)+'</h2><p class="endt" id="txt" aria-hidden="true"></p>'+(win&&co?'<p class="coda"><b>Raven file.</b> '+esc(co.coda)+(nl?' <em>New lead added: '+leads().length+' of '+nLeads()+'.</em>':'')+'</p>':'')+'<p class="mute">Clues gathered: '+notes.length+'. Endings found: '+nsf(cs)+' of '+total(cs)+(sf(cs)?' plus a secret ★':'')+'.</p>'+(sc.s?'<p class="mute">★ Secret ending unlocked!</p>':'')+'<div class="ch"><button class="choice" data-restart="1">Replay and take a different path</button><button class="choice" data-home="1">All cases</button></div>';
- say(sc.e+". "+sc.t);typeIn(g("txt"),sc.t);renderProf();
+ g("sc").innerHTML='<div class="ic" aria-hidden="true">'+(sc.i||"🏁")+'</div><h2>'+esc(sc.e)+'</h2><p class="endt" id="txt" aria-hidden="true"></p><div id="epi"></div>'+(win&&co?'<p class="coda"><b>Raven file.</b> '+esc(co.coda)+(nl?' <em>New lead added: '+leads().length+' of '+nLeads()+'.</em>':'')+'</p>':'')+'<p class="mute">Clues gathered: '+notes.length+'. Endings found: '+nsf(cs)+' of '+total(cs)+(sf(cs)?' plus a secret ★':'')+'.</p>'+(sc.s?'<p class="mute">★ Secret ending unlocked!</p>':'')+'<div class="ch"><button class="choice" data-restart="1">Replay and take a different path</button><button class="choice" data-home="1">All cases</button></div>';
+ say(sc.e+". "+sc.t);
+ typeIn(g("txt"),sc.t,function(){var el=g("epi");if(el)epi=CFEpilogue.show(el,cs.id,id,{type:sc.s?"secret":win?"good":sc.k=="weak"?"neutral":"bad",noButton:true})});
+ renderProf();
  clean=!Object.keys(fl).some(function(k){return k.indexOf("v_")!==0&&/(gone|closed|burnt)$/.test(k)});
  checkAch({gentle:win&&clean,first:win&&att(cs)===1,speed:win&&!!cs.moves&&left>=3});
  if(nl&&leads().length==STORY.need)setTimeout(function(){toast("🪶 Final case unlocked")},2600)}
@@ -124,6 +199,7 @@ document.addEventListener("click",function(ev){var pp=g("pp");if(!pp.hidden&&!ev
  if(d.w){curW=d.w;home();return}
  if(d.board){var bd=g("board");bd.hidden=!bd.hidden;if(!bd.hidden){shown=0;tlShown=0}renderBoard();if(!bd.hidden)bd.scrollIntoView({block:"start"});return}
  if(d.c!==undefined){var k=C[+d.c],lm=lockMsg(k);if(lm){toast("🔒 "+lm);return}warp(k,function(){openCase(+d.c)});return}
+ if(d.gal){gallery();return}
  if(d.home){home();return}
  if(d.restart){openCase(ci);return}
  if(d.to){if(cs.moves&&d.to!==cs.hub&&d.to!=="accuse"&&cur!==cs.S.accuse&&!(cur&&d.to===cur.b)){if(left<=0){go("timeout");return}left--}setf(d.set);go(d.to)}
@@ -133,5 +209,9 @@ document.addEventListener("mouseover",function(e){var sv=g("strings");if(!sv)ret
  Array.prototype.forEach.call(sv.querySelectorAll("path"),function(x){var h=pn&&(x.dataset.a==i||x.dataset.b==i);x.classList.toggle("hot",!!h);if(h)any=true});sv.classList.toggle("dim",any)});
 document.addEventListener("pointerout",function(e){var f=e.target.closest&&e.target.closest(".folder");if(f)f.style.transform=""});
 document.addEventListener("pointermove",function(e){var f=e.target.closest&&e.target.closest(".folder");if(f){var r=f.getBoundingClientRect();f.style.transform="perspective(600px) rotateY("+(((e.clientX-r.left)/r.width-.5)*14)+"deg) rotateX("+(-((e.clientY-r.top)/r.height-.5)*10)+"deg) translateY(-4px)"}var ck=e.target.closest&&e.target.closest("#cork");if(ck){var q=ck.getBoundingClientRect();ck.style.setProperty("--cx",(e.clientX-q.left)+"px");ck.style.setProperty("--cy",(e.clientY-q.top)+"px")}document.body.style.setProperty("--mx",e.clientX+"px");document.body.style.setProperty("--my",e.clientY+"px")});
+C.forEach(function(c){var m=meta(c),map={};
+ CFEndings.register(c.id,{title:c.title,endings:m.end.map(function(e){map[e.id]=e.lines;return {id:e.id,title:e.title,type:e.type,hint:e.hint}})});
+ CFEpilogue.register(c.id,map);
+ got(c).forEach(function(x){CFEndings.unlock(c.id,x)})});
 renderProf();if(!prof().name)g("pp").hidden=false;home();
 })();

@@ -1,0 +1,12 @@
+#txt{white-space:pre-line}
+.sus{display:flex;gap:16px;align-items:center;margin-bottom:14px}
+.si{flex:1;min-width:0;display:grid;gap:8px}
+.si b{font:23px "Special Elite",monospace;font-weight:400}
+.si i{color:var(--mute);font-size:16px}
+.choice:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none;border-color:var(--line);background:#10222a}
+.choice:disabled::before{content:"\1F910  "}
+.choice:disabled:hover{transform:none;box-shadow:none;border-color:var(--line);background:#10222a}
+#tlp{margin-top:20px}
+#tlp .cft{padding:0;background:none;box-shadow:none}
+#cont{margin-bottom:22px}
+#epi .cfx{margin:0 0 17.5px;padding:18px 20px}
