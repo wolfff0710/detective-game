@@ -1,6 +1,6 @@
 (function(){
 "use strict";
-var C=window.CASES||[],STORY=window.STORY||{need:4,leads:{}},app=document.getElementById("app"),cs,ci,fl,notes,cur,left=0,bview="cork",tlShown=0,curW="all",shown=0,editing=false,tw=null,
+var C=window.CASES||[],STORY=window.STORY||{need:4,leads:{}},app=document.getElementById("app"),cs,ci,fl,notes,bview="cork",tlShown=0,curW="all",shown=0,editing=false,tw=null,
 curId=null,ended=false,face=null,faceKey="",meter=null,epi=null,gal=null,atl=null,tlRows=[],M={},
 AGG=/_(push|hard|order|threat|blunt|bag|blame|denies|shut)$/,SOFT=/_(ask|kind|nice|chat)$/,PRESS=55,
 RANK=["Rookie","Constable","Inspector","Chief Inspector","Legend"],
@@ -37,7 +37,6 @@ var ACH=[
 {id:"five",n:"Five Down",i:"⭐",d:"Win 5 cases.",t:function(){return C.filter(wins).length>=5}},
 {id:"allsecret",n:"Found Every Secret Ending",i:"🗝️",d:"Find the secret ending in every case.",t:function(){return C.length>0&&C.every(function(c){return sf(c)>0})}},
 {id:"sweep",n:"Clean Sweep",i:"🎖️",d:"Win every case.",t:function(){return C.length>0&&C.every(wins)}},
-{id:"speed",n:"Beat the Clock",i:"⏱️",d:"Win a timed case with 3 or more moves to spare.",ev:"speed"},
 {id:"chrono",n:"Chronologist",i:"🕒",d:"Build a timeline of 5 or more timestamped clues.",ev:"chrono"},
 {id:"rift",n:"Rift Walker",i:"🌀",d:"Win a case in the Rift.",t:function(){return C.some(function(c){return worldOf(c).id=="rift"&&wins(c)})}},
 {id:"travel",n:"Multiverse Traveller",i:"🌌",d:"Win a case in every universe.",t:function(){var W=STORY.worlds||[];return W.length>0&&W.every(function(w){return w.cases.some(function(id){var c=byId(id);return c&&wins(c)})})}},
@@ -79,7 +78,6 @@ function renderTL(still){var el=g("tl"),its=[],out="",from=still?notes.length:tl
  g("bstat").textContent=its.length+" of "+notes.length+" clues have a timestamp";tlShown=notes.length;
  if(its.length>=5)checkAch({chrono:true})}
 function warp(c,fn){if(matchMedia("(prefers-reduced-motion:reduce)").matches){fn();return}var w=document.createElement("div");w.className="warp";w.style.setProperty("--c",worldOf(c).color);document.body.appendChild(w);setTimeout(fn,430);setTimeout(function(){w.remove()},1100)}
-function hud(){var h=g("clk");if(!h)return;if(!cs.moves){h.hidden=true;return}h.hidden=false;h.className="clock"+(left<=2?" low":"");h.innerHTML='<span>⏱ '+left*cs.step+' min '+esc(cs.tl)+'</span><i><b style="width:'+Math.round(left/cs.moves*100)+'%"></b></i>'}
 
 /* ===== case analysis: suspects, scene ownership, culprit, endings (feeds portraits, mood, gallery, epilogues) ===== */
 function rx(n){return new RegExp("\\b"+n.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b")}
@@ -103,7 +101,6 @@ function meta(c){if(M[c.id])return M[c.id];
   if(id=="win_master"){hint="Prove every angle before you accuse.";lines=[{when:"The next morning",text:cn+" is gone, and "+pl+" finally exhales."},{when:"Years later",text:"People still tell the story of the detective who missed nothing."}]}
   else if(id=="win"){hint="Accuse the culprit with solid, not perfect, evidence.";lines=[{when:"A week later",text:cn+" is out of the picture, though a few loose ends remain."},{when:"Months later",text:"You keep the file closed. Mostly."}]}
   else if(s.s){hint="A quieter ending exists. Gather enough, then talk instead of accusing.";lines=[{when:"The next morning",text:cn+" is given a second chance, and keeps it."},{when:"Years later",text:"Nobody at "+pl+" remembers the headline. They remember how it ended."}]}
-  else if(id=="timeout"){hint="Don't let the clock run out.";lines=[{when:"Afterwards",text:"Everyone agrees there was no time left, and that you might have found it sooner."},{when:"Years later",text:"You still check the clock first."}]}
   else if(s.k=="weak"){hint=id=="weak"?"Name the culprit with almost nothing to back it up.":"Right culprit, wrong moment. Don't tip them off.";lines=[{when:"That night",text:cn+" sleeps soundly. You do not."},{when:"Years later",text:"The case at "+pl+" stays open in your head."}]}
   else{hint="Accuse the wrong person"+(v&&v.role?" ("+v.role+")":"")+".";lines=v?[{when:"The next day",text:v.name+" spends a long time clearing their name."},{when:"A year later",text:cn+" was never looked at twice."}]:[{when:"The next day",text:"The wrong name is already in the headlines."},{when:"A year later",text:cn+" was never looked at twice."}]}
   ends.push({id:id,title:s.e,type:type,hint:hint,lines:lines})});
@@ -119,7 +116,7 @@ document.addEventListener("cf:mood-recovered",function(e){var p=e.detail.id.spli
 
 /* ===== notebook sync, alibi timeline, save ===== */
 function syncNotes(){var u=g("notes");if(!u)return;while(u.children.length<notes.length){var li=document.createElement("li");li.textContent=notes[u.children.length];u.appendChild(li)}g("none").hidden=notes.length>0;renderBoard()}
-function persist(){if(cs&&!ended&&curId!=null)CFSave.save(cs.id,{cur:curId,fl:fl,notes:notes,left:left,mood:CFMood.export()},{label:notes.length+" clues"})}
+function persist(){if(cs&&!ended&&curId!=null)CFSave.save(cs.id,{cur:curId,fl:fl,notes:notes,mood:CFMood.export()},{label:notes.length+" clues"})}
 function addNote(t){if(notes.indexOf(t)<0){notes.push(t);syncNotes();persist()}}
 function addStmt(r,k){atl.add({id:cs.id+"#"+k,who:r[1],about:r[2],start:r[3],end:r[4],place:r[5],text:r[6]})}
 document.addEventListener("cf:contradiction",function(e){if(!atl||!cs)return;var a=tlRows[+e.detail.a.split("#")[1]],b=tlRows[+e.detail.b.split("#")[1]];if(!a||!b)return;toast("Contradiction found");addNote("Contradiction: "+a[1]+" and "+b[1]+" disagree about "+a[2]+".")});
@@ -135,17 +132,17 @@ function idx(id){for(var i=0;i<C.length;i++)if(C[i].id==id)return i;return -1}
 function home(){clearView();cs=null;app.style.removeProperty("--acc");renderProf();var lv=leads(),W=STORY.worlds||[],cw=W.filter(function(w){return w.id==curW})[0],list=cw?cw.cases.map(byId).filter(Boolean):C,titles={},
  h='<div class="brand">'+LOGO+'<h1>Case Files</h1></div><p class="lead">Every choice branches the story. Question suspects, search rooms, and decide how hard to push: some doors close for good. Find every ending.</p><div id="cont"></div><p class="mute rf">🪶 Raven file: '+lv.length+' of '+nLeads()+' leads. '+(lv.length>=STORY.need?'The final case is open.':'Solve the '+(STORY.need-lv.length)+' remaining connected cases (marked 🪶) to unlock the final case.')+'</p><div class="mv"><div class="orbs">'+orb(null)+W.map(orb).join("")+'</div><p class="wdesc"'+(cw?' style="--c:'+cw.color+'"':'')+'>'+(cw?cw.icon+' <b>'+esc(cw.name)+'</b>. '+esc(cw.desc):'The multiverse holds '+W.length+' universes and '+C.length+' cases. Pick a universe to travel there.')+'</p></div><div class="folders">';
  C.forEach(function(c){titles[c.id]=c.title});
- list.forEach(function(c,i){var lk=lockMsg(c),ld=STORY.leads[c.id],wd=worldOf(c);h+='<button class="folder'+(lk?' locked':'')+'" data-c="'+C.indexOf(c)+'" style="animation-delay:'+(i*80)+'ms;border-top-color:'+wd.color+'"><div class="fi">'+(lk?'🔒':c.icon)+'</div><h3>'+c.title+'</h3><p>'+c.place+'</p><p>'+wd.icon+' '+wd.name+' · '+c.level+(c.moves?' · ⏱ '+c.moves*c.step+' min':'')+'</p>'+(lk?'<p>'+esc(lk)+'</p>':'<p>Endings found: '+nsf(c)+' of '+total(c)+(sf(c)?' ★ secret found':'')+'</p>')+(ld?'<p>🪶 Connected to the final case: '+(lv.indexOf(c.id)>=0?'solved':'not yet')+'</p>':'')+(lk?'<span class="stamp new">LOCKED</span>':wins(c)?'<span class="stamp">SOLVED</span>':'<span class="stamp new">OPEN</span>')+'</button>'});
+ list.forEach(function(c,i){var lk=lockMsg(c),ld=STORY.leads[c.id],wd=worldOf(c);h+='<button class="folder'+(lk?' locked':'')+'" data-c="'+C.indexOf(c)+'" style="animation-delay:'+(i*80)+'ms;border-top-color:'+wd.color+'"><div class="fi">'+(lk?'🔒':c.icon)+'</div><h3>'+c.title+'</h3><p>'+c.place+'</p><p>'+wd.icon+' '+wd.name+' · '+c.level+'</p>'+(lk?'<p>'+esc(lk)+'</p>':'<p>Endings found: '+nsf(c)+' of '+total(c)+(sf(c)?' ★ secret found':'')+'</p>')+(ld?'<p>🪶 Connected to the final case: '+(lv.indexOf(c.id)>=0?'solved':'not yet')+'</p>':'')+(lk?'<span class="stamp new">LOCKED</span>':wins(c)?'<span class="stamp">SOLVED</span>':'<span class="stamp new">OPEN</span>')+'</button>'});
  app.innerHTML=h+'</div><p><button class="back" data-gal="1">★ Ending gallery</button></p>';
  CFSave.mountContinue(g("cont"),{titles:titles,onResume:function(id,sv){var i=idx(id);if(i>=0)openCase(i,sv)}})}
 function gallery(){clearView();cs=null;app.style.removeProperty("--acc");app.innerHTML='<div class="top"><button class="back" data-home="1">← All cases</button></div><h1>Ending gallery</h1><p class="lead">Every case hides several endings. Locked ones show as silhouettes with a hint.</p><div id="gal"></div>';gal=CFEndings.mount(g("gal"));window.scrollTo(0,0)}
 function openCase(i,sv){clearView();cs=C[i];ci=i;ended=false;if(sv&&!cs.S[sv.cur])sv=null;
- fl=sv?sv.fl:{};notes=sv?sv.notes:[];shown=0;tlShown=0;bview="cork";cur=null;curId=null;left=sv&&sv.left!=null?sv.left:(cs.moves||0);
+ fl=sv?sv.fl:{};notes=sv?sv.notes:[];shown=0;tlShown=0;bview="cork";curId=null;
  app.style.setProperty("--acc",worldOf(cs).color);if(!sv)st("cf2_att_"+cs.id,att(cs)+1);
  CFMood.reset();if(sv)CFMood.import(sv.mood);
  if(cs.boss&&!sv)leads().forEach(function(id){var L=STORY.leads[id];if(L){fl["lead_"+id]=1;notes.push(L.n)}});
  var T=(window.CF_TL||{})[cs.id];tlRows=T||[];
- app.innerHTML='<div class="top"><button class="back" data-home="1">← All cases</button><button class="back" data-restart="1">↺ Restart</button></div><h1>'+cs.icon+' '+cs.title+'</h1><div class="grid"><section class="panel" id="sc"></section><section class="panel"><div class="clock" id="clk" hidden></div><h2>Notebook</h2><button class="bbtn" data-board="1">📌 Board &amp; timeline</button><ul id="notes"></ul><p id="none" class="mute">No clues yet.</p></section></div>'+(T?'<section class="panel" id="tlp"></section>':'')+'<section class="panel board" id="board" hidden><div class="tabs"><button class="on" data-view="cork">📌 Evidence board</button><button data-view="tl">🕒 Timeline</button></div><p class="mute" id="bstat"></p><div class="cork" id="cork"><svg id="strings" aria-hidden="true"></svg><div id="pins"></div></div><div class="tline" id="tl" hidden></div></section>';
+ app.innerHTML='<div class="top"><button class="back" data-home="1">← All cases</button><button class="back" data-restart="1">↺ Restart</button></div><h1>'+cs.icon+' '+cs.title+'</h1><div class="grid"><section class="panel" id="sc"></section><section class="panel"><h2>Notebook</h2><button class="bbtn" data-board="1">📌 Board &amp; timeline</button><ul id="notes"></ul><p id="none" class="mute">No clues yet.</p></section></div>'+(T?'<section class="panel" id="tlp"></section>':'')+'<section class="panel board" id="board" hidden><div class="tabs"><button class="on" data-view="cork">📌 Evidence board</button><button data-view="tl">🕒 Clue timeline</button></div><p class="mute" id="bstat"></p><div class="cork" id="cork"><svg id="strings" aria-hidden="true"></svg><div id="pins"></div></div><div class="tline" id="tl" hidden></div></section>';
  atl=T?CFTimeline.mount(g("tlp"),[],{title:"Alibi timeline"}):null;
  if(sv&&atl)tlRows.forEach(function(r,k){if(fl["v_"+r[0]])addStmt(r,k)});
  window.scrollTo(0,0);go(sv?sv.cur:cs.start,{restore:!!sv})}
@@ -161,7 +158,7 @@ function go(id,o){o=o||{};stopType();if(epi){epi.destroy();epi=null}if(meter){me
  if(!o.restore&&!o.pre)CFMood.tick(key);
  setf(sc.f);
  if(sc.n&&notes.indexOf(sc.n)<0){notes.push(sc.n);toast("Clue noted")}
- syncNotes();cur=sc;hud();
+ syncNotes();
  if(atl)tlRows.forEach(function(r,k){if(r[0]==id)addStmt(r,k)});
  if(sc.e)return ending(sc,id);
  curId=id;
@@ -186,7 +183,7 @@ function ending(sc,id){var d=got(cs),co=STORY.leads[cs.id],win=sc.k=="win",nl=fa
  typeIn(g("txt"),sc.t,function(){var el=g("epi");if(el)epi=CFEpilogue.show(el,cs.id,id,{type:sc.s?"secret":win?"good":sc.k=="weak"?"neutral":"bad",noButton:true})});
  renderProf();
  clean=!Object.keys(fl).some(function(k){return k.indexOf("v_")!==0&&/(gone|closed|burnt)$/.test(k)});
- checkAch({gentle:win&&clean,first:win&&att(cs)===1,speed:win&&!!cs.moves&&left>=3});
+ checkAch({gentle:win&&clean,first:win&&att(cs)===1});
  if(nl&&leads().length==STORY.need)setTimeout(function(){toast("🪶 Final case unlocked")},2600)}
 document.addEventListener("click",function(ev){var pp=g("pp");if(!pp.hidden&&!ev.target.closest("#pf"))pp.hidden=true;
  if(ev.target.closest("#txt")){skipType();return}
@@ -202,7 +199,7 @@ document.addEventListener("click",function(ev){var pp=g("pp");if(!pp.hidden&&!ev
  if(d.gal){gallery();return}
  if(d.home){home();return}
  if(d.restart){openCase(ci);return}
- if(d.to){if(cs.moves&&d.to!==cs.hub&&d.to!=="accuse"&&cur!==cs.S.accuse&&!(cur&&d.to===cur.b)){if(left<=0){go("timeout");return}left--}setf(d.set);go(d.to)}
+ if(d.to){setf(d.set);go(d.to)}
 });
 window.addEventListener("resize",function(){renderBoard(true)});
 document.addEventListener("mouseover",function(e){var sv=g("strings");if(!sv)return;var pn=e.target.closest&&e.target.closest(".pin"),i=pn?pn.dataset.i:null,any=false;
