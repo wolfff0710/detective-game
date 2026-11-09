@@ -6,6 +6,7 @@ AGG=/_(push|hard|order|threat|blunt|bag|blame|denies|shut)$/,SOFT=/_(ask|kind|ni
 RANK=["Rookie","Constable","Inspector","Chief Inspector","Legend"],
 TITLES=/^(Dr|Mr|Mrs|Ms|Prof|Lady|Captain|Director|Chef|Maestro|Cook)\.?$/,
 LOGO='<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 10 716 716" xmlns:c2pa="http://c2pa.org/manifest"><defs><clipPath id="cfi"><rect x="10" y="10" width="716" height="716" rx="170"/></clipPath><linearGradient id="cfb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1620"/><stop offset="1" stop-color="#0a131a"/></linearGradient><linearGradient id="cfe" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6cc4b5"/><stop offset="1" stop-color="#4aa396"/></linearGradient></defs><g clip-path="url(#cfi)"><rect x="10" y="10" width="716" height="716" fill="url(#cfb)"/><circle cx="152" cy="188" r="68" fill="#ece5c8"/><rect x="115" y="432" width="505" height="294" fill="#0a141c"/><rect x="10" y="432" width="105" height="294" fill="#13232c"/><rect x="100" y="518" width="95" height="208" fill="#101d25"/><rect x="533" y="462" width="87" height="264" fill="#0f1c24"/><rect x="620" y="382" width="106" height="344" fill="#12222b"/><g fill="#e3b95c"><rect x="37" y="469" width="15" height="15"/><rect x="73" y="519" width="15" height="15"/><rect x="130" y="555" width="15" height="15"/><rect x="648" y="425" width="15" height="15"/><rect x="677" y="483" width="15" height="15"/><rect x="562" y="505" width="15" height="15"/><rect x="584" y="569" width="15" height="15"/></g><path d="M100 742L230 598L368 708L505 598L636 742Z" fill="#131b21" stroke="#5fb8aa" stroke-width="12" stroke-linejoin="round"/><ellipse cx="288" cy="537" rx="42" ry="16" transform="rotate(8 288 537)" fill="url(#cfe)"/><ellipse cx="447" cy="537" rx="42" ry="16" transform="rotate(-8 447 537)" fill="url(#cfe)"/><path d="M218 342C222 236 284 152 368 152S512 236 520 342Z" fill="#05090b"/><path d="M238 288C300 300 436 302 497 288L503 336L232 336Z" fill="#e3b95c"/><path d="M218 342C222 236 284 152 368 152S512 236 520 342" fill="none" stroke="#5fb8aa" stroke-width="12" stroke-linejoin="round"/><path d="M272 202Q368 246 466 202" fill="none" stroke="#5fb8aa" stroke-width="10" stroke-linecap="round"/><path d="M474 304L582 150L518 284L488 322Z" fill="#d4574b"/><ellipse cx="368" cy="400" rx="262" ry="64" fill="#05090b" stroke="#5fb8aa" stroke-width="12"/></g><rect x="10" y="10" width="716" height="716" rx="170" fill="none" stroke="#26373d" stroke-width="8"/></svg>';
+function emit(n,d){var e=new CustomEvent("cf:"+n,{detail:d||{},cancelable:true});document.dispatchEvent(e);return !e.defaultPrevented}
 function fire(n,d){document.dispatchEvent(new CustomEvent(n,{detail:d}))}
 function g(i){return document.getElementById(i)}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -105,6 +106,7 @@ function meta(c){if(M[c.id])return M[c.id];
  Object.keys(S).forEach(function(id){var s=S[id];if(!s.e)return;var v=id.indexOf("end_")==0?lab[id]:null,
   type=s.s?"secret":s.k=="win"?"good":s.k=="weak"?"neutral":"bad",hint,lines;
   if(id=="win_master"){hint="Prove every angle before you accuse.";lines=[{when:"The next morning",text:cn+" is gone, and "+pl+" finally exhales."},{when:"Years later",text:"People still tell the story of the detective who missed nothing."}]}
+  else if(id=="trial_win"){hint="Get it wrong, then win it back in court.";lines=[{when:"After the verdict",text:cn+" is led away, and the file closes for good."},{when:"Years later",text:"You still remember the sound of the gavel."}]}
   else if(id=="win"){hint="Accuse the culprit with solid, not perfect, evidence.";lines=[{when:"A week later",text:cn+" is out of the picture, though a few loose ends remain."},{when:"Months later",text:"You keep the file closed. Mostly."}]}
   else if(s.s){hint="A quieter ending exists. Gather enough, then talk instead of accusing.";lines=[{when:"The next morning",text:cn+" is given a second chance, and keeps it."},{when:"Years later",text:"Nobody at "+pl+" remembers the headline. They remember how it ended."}]}
   else if(s.k=="weak"){hint=id=="weak"?"Name the culprit with almost nothing to back it up.":"Right culprit, wrong moment. Don't tip them off.";lines=[{when:"That night",text:cn+" sleeps soundly. You do not."},{when:"Years later",text:"The case at "+pl+" stays open in your head."}]}
@@ -162,6 +164,7 @@ function go(id,o){o=o||{};stopType();if(epi){epi.destroy();epi=null}if(meter){me
  if(sc.r)for(var i=0;i<sc.r.length;i++)if(has(sc.r[i][0]))return go(sc.r[i][1]);
  if(sc.g){var n=sc.g[0].filter(function(x){return fl[x]}).length;for(var j=1;j<sc.g.length;j++)if(n>=sc.g[j][0])return go(sc.g[j][1])}
  if(!o.restore&&!o.pre)CFMood.tick(key);
+ if(!emit("before",{id:id,sc:sc}))return;
  setf(sc.f);
  if(sc.n&&notes.indexOf(sc.n)<0){notes.push(sc.n);toast("Clue noted")}
  syncNotes();
@@ -217,7 +220,7 @@ C.forEach(function(c){var m=meta(c),map={};
  CFEndings.register(c.id,{title:c.title,endings:m.end.map(function(e){map[e.id]=e.lines;return {id:e.id,title:e.title,type:e.type,hint:e.hint}})});
  CFEpilogue.register(c.id,map);
  got(c).forEach(function(x){CFEndings.unlock(c.id,x)})});
-window.CF={C:C,state:function(){return{cs:cs,fl:fl}},wins:wins,worldOf:worldOf,has:has};
+window.CF={C:C,state:function(){return{cs:cs,fl:fl,notes:notes}},wins:wins,worldOf:worldOf,has:has,go:go};
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){renderBoard(true)});
 renderProf();if(!prof().name)g("pp").hidden=false;home();
 })();
