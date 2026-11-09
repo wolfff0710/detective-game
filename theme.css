@@ -1,0 +1,68 @@
+/* fx/theme.css — per-world fonts, textures, panel shapes, folder styles and stamp variants. Load AFTER style.css and fx.css */
+:root{
+--t-paper:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .95 0 0 0 0 .88 0 0 0 0 .7 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+--t-concrete:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.03' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .62 0 0 0 0 .68 0 0 0 0 .72 0 0 0 .2 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+--t-scan:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px);
+--t-metal:repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 1px,rgba(0,0,0,.06) 1px 2px),linear-gradient(115deg,rgba(255,255,255,.07),transparent 40%,rgba(255,255,255,.04) 70%,transparent);
+--t-glass:linear-gradient(135deg,rgba(255,255,255,.1),rgba(255,255,255,.02) 55%,rgba(255,255,255,.07));
+--t-lined:repeating-linear-gradient(transparent 0 27px,rgba(110,160,240,.12) 27px 28px);
+--t-velvet:repeating-linear-gradient(45deg,rgba(255,210,120,.045) 0 2px,transparent 2px 7px),radial-gradient(120% 80% at 50% 0,rgba(255,200,120,.06),transparent);
+}
+@keyframes cf-holo{to{background-position:300% 0,300% 0}}
+
+/* tokens on the app container */
+#app{--font-h:"Special Elite","Courier New",monospace;--font-b:"Work Sans",system-ui,sans-serif;--tex:none;--r:12.5px}
+body[data-theme]{background:radial-gradient(1250px 625px at 80% -10%,var(--glow,#15262b),transparent),var(--bg)}
+#app h1,#app h2,#app h3,#app .info b,#app .clock span,#app .tl-time,#app .orb b{font-family:var(--font-h)}
+#app .choice,#app #txt,#app .endt,#app .lead,#app #notes li,#app .back{font-family:var(--font-b)}
+#app .panel{background-image:var(--tex);border-radius:var(--r)}
+#app .choice{border-radius:var(--r)}
+#app[data-tex=paper]{--tex:var(--t-paper)}
+#app[data-tex=concrete]{--tex:var(--t-concrete)}
+#app[data-tex=scan]{--tex:var(--t-scan)}
+#app[data-tex=metal]{--tex:var(--t-metal)}
+#app[data-tex=glass]{--tex:var(--t-glass)}
+#app[data-tex=lined]{--tex:var(--t-lined)}
+#app[data-tex=velvet]{--tex:var(--t-velvet)}
+#app[data-tex=glass] .panel{backdrop-filter:blur(8px);background-color:#121c20c4}
+
+/* themes */
+:is(body,#app)[data-theme=heritage]{--bg:#110c0a;--glow:#2a1c14;--panel:#1b1411;--line:#44331f;--font-h:"Playfair Display",Georgia,serif;--r:6px}
+:is(body,#app)[data-theme=school]{--bg:#0e1522;--glow:#1d2c4a;--panel:#16203a;--line:#33466e;--font-h:"Fredoka","Work Sans",sans-serif;--font-b:"Fredoka","Work Sans",sans-serif;--r:20px}
+:is(body,#app)[data-theme=festive]{--bg:#150a14;--glow:#4a1d2e;--panel:#241222;--line:#5a2d3d;--font-h:"Playfair Display",Georgia,serif;--r:14px}
+:is(body,#app)[data-theme=coast]{--bg:#0a1418;--glow:#12303a;--panel:#10222a;--line:#284450;--r:10px}
+:is(body,#app)[data-theme=polar]{--bg:#050d16;--glow:#103a52;--panel:#0d1e2c;--line:#2a5068;--font-h:"Share Tech Mono",monospace;--r:16px}
+:is(body,#app)[data-theme=abyss]{--bg:#020b12;--glow:#06384d;--panel:#06202c;--line:#14566e;--font-h:"Orbitron",sans-serif;--r:14px}
+:is(body,#app)[data-theme=neo]{--bg:#07040f;--glow:#2a0f4a;--panel:#100a1e;--line:#3a2a66;--font-h:"Orbitron",sans-serif;--font-b:"Share Tech Mono","Work Sans",monospace;--r:4px}
+:is(body,#app)[data-theme=rift]{--bg:#090514;--glow:#33165e;--panel:#140c24;--line:#46307a;--font-h:"Orbitron",sans-serif;--r:4px}
+#app[data-theme=neo] .panel,#app[data-theme=rift] .panel{clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100% - 18px))}
+#app[data-theme=neo] h1,#app[data-theme=rift] h1{font-size:clamp(26px,5vw,42px);letter-spacing:.06em}
+#app[data-theme=heritage] .panel{box-shadow:inset 0 0 0 4px var(--panel),inset 0 0 0 5px #c9a14a55}
+
+/* folders (home screen) */
+#app .folder{position:relative;background:var(--f-bg,var(--panel));color:var(--f-fg,var(--text));border-color:var(--f-bd,var(--line));font-family:var(--f-font,var(--font-b))}
+#app .folder p{color:var(--f-mute,var(--mute))}
+#app .folder h3{font-family:var(--f-font,var(--font-h))}
+.folder[data-theme=classic]{--f-bg:linear-gradient(160deg,#e8d8a6,#d3bf86);--f-fg:#2a2210;--f-mute:#5d4e2c;--f-bd:#a58b45;--f-font:"Special Elite",monospace}
+.folder[data-theme=heritage]{--f-bg:linear-gradient(160deg,#2c211a,#16100d);--f-fg:#f2e6cf;--f-mute:#b9a583;--f-bd:#c9a14a;--f-font:"Playfair Display",serif;box-shadow:inset 0 0 0 4px #16100d,inset 0 0 0 5px #c9a14a66}
+.folder[data-theme=school]{--f-bg:repeating-linear-gradient(transparent 0 25px,#6b9be040 25px 26px),#fbf6e6;--f-fg:#2b2b3a;--f-mute:#5b5b70;--f-bd:#e9a86b;--f-font:"Fredoka",sans-serif;padding-left:36px!important}
+.folder[data-theme=school]::before{content:"";position:absolute;left:10px;top:36px;bottom:16px;width:10px;background:radial-gradient(circle,#0007 3.5px,transparent 4px) 0 0/10px 24px repeat-y}
+.folder[data-theme=festive]{--f-bg:linear-gradient(160deg,#4a1a2c,#2a1022);--f-fg:#ffe9c7;--f-mute:#e0b88a;--f-bd:#e3a53a;--f-font:"Playfair Display",serif;border-style:dotted}
+.folder[data-theme=coast]{--f-bg:linear-gradient(#17323a,#0f2128);--f-fg:#e6f2ee;--f-mute:#9fc0bb;--f-bd:#c9b07a;border-style:dashed}
+.folder[data-theme=polar]{--f-bg:linear-gradient(135deg,#ffffff24,#ffffff08);--f-fg:#e8f7ff;--f-mute:#a9cde0;--f-bd:#bfe9ff88;--f-font:"Share Tech Mono",monospace;backdrop-filter:blur(8px)}
+.folder[data-theme=abyss]{--f-bg:linear-gradient(#04222f,#021018);--f-fg:#d8f8ff;--f-mute:#7fb8c8;--f-bd:#1d6f8a;--f-font:"Orbitron",sans-serif;box-shadow:0 0 18px #3de0ff22}
+.folder[data-theme=rift]{--f-bg:linear-gradient(160deg,#2a1450,#0e0620);--f-fg:#efe6ff;--f-mute:#b9a3e0;--f-bd:#b98cff;--f-font:"Orbitron",sans-serif}
+.folder[data-theme=neo]{--f-bg:linear-gradient(#0b0f1c,#0b0f1c) padding-box,linear-gradient(115deg,#ff4fa3,#7c5cff,#3de0ff,#ff4fa3) border-box;--f-fg:#f4eeff;--f-mute:#a99cd0;--f-font:"Orbitron",sans-serif;border:2px solid transparent;background-size:auto,300% 100%;animation:rise2 .5s backwards,cf-holo 6s linear infinite}
+.folder[data-theme=neo] p{font-family:"Share Tech Mono",monospace}
+
+/* stamp variants */
+.folder[data-theme=heritage] .stamp{display:inline-grid;place-items:center;width:74px;height:74px;padding:0;border:0;border-radius:50% 46% 52% 48%/48% 52% 46% 50%;background:radial-gradient(circle at 35% 30%,#e8695a,#a31f1f 58%,#5e0d0d);color:#ffe3d8;font-size:12px;letter-spacing:.06em;box-shadow:0 3px 8px #000a,inset 0 0 0 5px #0000001a,inset 0 0 0 6px #ffffff22;transform:rotate(-8deg)}
+.folder[data-theme=heritage] .stamp.new{background:radial-gradient(circle at 35% 30%,#8a8e92,#4a4e52 60%,#2a2d30);color:#d7dadd}
+.folder[data-theme=school] .stamp{border:3px solid #c0392b;background:#c0392b;color:#fff;border-radius:6px 8px 5px 9px;font-family:"Fredoka",sans-serif;letter-spacing:.12em;padding:2px 12px;transform:rotate(3deg);box-shadow:inset 0 0 0 2px #fff6,0 2px 0 #7e2218}
+.folder[data-theme=school] .stamp.new{background:transparent;color:#c0392b;box-shadow:none}
+.folder[data-theme=neo] .stamp,.folder[data-theme=abyss] .stamp,.folder[data-theme=rift] .stamp{border:0;padding:3px 14px;border-radius:999px;color:#06070f;font-family:"Orbitron",sans-serif;font-size:12px;letter-spacing:.14em;background:linear-gradient(115deg,#ff4fa3,#7c5cff,#3de0ff,#7cffb2,#ff4fa3);background-size:300% 100%;animation:cf-holo 4s linear infinite;transform:none;box-shadow:0 0 14px #7c5cff88}
+.folder[data-theme=neo] .stamp.new,.folder[data-theme=abyss] .stamp.new,.folder[data-theme=rift] .stamp.new{background:transparent;color:var(--f-mute);border:1px solid var(--f-mute);box-shadow:none;animation:none}
+.folder[data-theme=festive] .stamp{border:0;color:#3a1a00;background:linear-gradient(#ffd97a,#e2a63a);padding:3px 18px;clip-path:polygon(0 0,100% 0,92% 50%,100% 100%,0 100%,8% 50%);transform:rotate(-3deg)}
+.folder[data-theme=festive] .stamp.new{background:#8a6a3a;color:#f6e3c2}
+.folder[data-theme=coast] .stamp{border:2px solid #c9b07a;color:#e8d8a6;background:linear-gradient(#3a5a62,#223c44);border-radius:4px;transform:none;box-shadow:inset 0 0 0 2px #0006}
+.folder[data-theme=polar] .stamp{border:2px dashed #bfe9ff;color:#bfe9ff;border-radius:10px}

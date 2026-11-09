@@ -5,7 +5,8 @@ curId=null,ended=false,face=null,faceKey="",meter=null,epi=null,gal=null,atl=nul
 AGG=/_(push|hard|order|threat|blunt|bag|blame|denies|shut)$/,SOFT=/_(ask|kind|nice|chat)$/,PRESS=55,
 RANK=["Rookie","Constable","Inspector","Chief Inspector","Legend"],
 TITLES=/^(Dr|Mr|Mrs|Ms|Prof|Lady|Captain|Director|Chef|Maestro|Cook)\.?$/,
-LOGO='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5fb8aa"/><stop offset="1" stop-color="#e3b95c"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="#0a1114"/><circle cx="28" cy="28" r="15" fill="#121c20" stroke="url(#g)" stroke-width="4"/><path d="M19 31c0-6 4-10 9-10s9 4 9 10M22.5 33c0-4.5 2.5-7.5 5.5-7.5s5.5 3 5.5 7.5M26 35c0-2.5.8-4 2-4s2 1.5 2 4" fill="none" stroke="#5fb8aa" stroke-width="2" stroke-linecap="round"/><path d="M39 39l14 14" stroke="#e3b95c" stroke-width="6" stroke-linecap="round"/><circle cx="50" cy="14" r="4" fill="#d4574b"/></svg>';
+LOGO='<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 10 716 716" xmlns:c2pa="http://c2pa.org/manifest"><defs><clipPath id="cfi"><rect x="10" y="10" width="716" height="716" rx="170"/></clipPath><linearGradient id="cfb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1620"/><stop offset="1" stop-color="#0a131a"/></linearGradient><linearGradient id="cfe" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6cc4b5"/><stop offset="1" stop-color="#4aa396"/></linearGradient></defs><g clip-path="url(#cfi)"><rect x="10" y="10" width="716" height="716" fill="url(#cfb)"/><circle cx="152" cy="188" r="68" fill="#ece5c8"/><rect x="115" y="432" width="505" height="294" fill="#0a141c"/><rect x="10" y="432" width="105" height="294" fill="#13232c"/><rect x="100" y="518" width="95" height="208" fill="#101d25"/><rect x="533" y="462" width="87" height="264" fill="#0f1c24"/><rect x="620" y="382" width="106" height="344" fill="#12222b"/><g fill="#e3b95c"><rect x="37" y="469" width="15" height="15"/><rect x="73" y="519" width="15" height="15"/><rect x="130" y="555" width="15" height="15"/><rect x="648" y="425" width="15" height="15"/><rect x="677" y="483" width="15" height="15"/><rect x="562" y="505" width="15" height="15"/><rect x="584" y="569" width="15" height="15"/></g><path d="M100 742L230 598L368 708L505 598L636 742Z" fill="#131b21" stroke="#5fb8aa" stroke-width="12" stroke-linejoin="round"/><ellipse cx="288" cy="537" rx="42" ry="16" transform="rotate(8 288 537)" fill="url(#cfe)"/><ellipse cx="447" cy="537" rx="42" ry="16" transform="rotate(-8 447 537)" fill="url(#cfe)"/><path d="M218 342C222 236 284 152 368 152S512 236 520 342Z" fill="#05090b"/><path d="M238 288C300 300 436 302 497 288L503 336L232 336Z" fill="#e3b95c"/><path d="M218 342C222 236 284 152 368 152S512 236 520 342" fill="none" stroke="#5fb8aa" stroke-width="12" stroke-linejoin="round"/><path d="M272 202Q368 246 466 202" fill="none" stroke="#5fb8aa" stroke-width="10" stroke-linecap="round"/><path d="M474 304L582 150L518 284L488 322Z" fill="#d4574b"/><ellipse cx="368" cy="400" rx="262" ry="64" fill="#05090b" stroke="#5fb8aa" stroke-width="12"/></g><rect x="10" y="10" width="716" height="716" rx="170" fill="none" stroke="#26373d" stroke-width="8"/></svg>';
+function fire(n,d){document.dispatchEvent(new CustomEvent(n,{detail:d}))}
 function g(i){return document.getElementById(i)}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function has(r){if(!r)return true;return r.split("|").some(function(p){return p.split(",").every(function(x){x=x.trim();return x[0]=="!"?!fl[x.slice(1)]:!!fl[x]})})}
@@ -54,8 +55,9 @@ function stamp(t,c){var d=document.createElement("div");d.className="bigstamp "+
 function flash(){var q=document.createElement("div");q.className="fl";document.body.appendChild(q);setTimeout(function(){q.remove()},600)}
 function names(c){var s={};Object.keys(c.S).forEach(function(k){(c.S[k].c||[]).forEach(function(ch){if(/^(ac_|end_)/.test(ch[1]))ch[0].split(",")[0].split(/\s+/).forEach(function(w){if(/^[A-Z][a-z]/.test(w)&&!TITLES.test(w))s[w]=1})})});return Object.keys(s)}
 function links(list){var e=[],seen={};names(cs).forEach(function(n){var re=new RegExp("\\b"+n+"\\b"),prev=-1;list.forEach(function(t,i){if(re.test(t)){if(prev>=0&&!seen[prev+"-"+i]){seen[prev+"-"+i]=1;e.push([prev,i])}prev=i}})});return e}
-function renderBoard(still){var bd=g("board");if(!cs||!bd||bd.hidden)return;if(bview=="tl")return renderTL(still);var p=g("pins"),sv=g("strings"),ck=g("cork"),from=still?notes.length:shown,L=links(notes),pts=[],i,el,d="",nk=0,pl=notes.length-from;
+function renderBoard(still){var bd=g("board");if(!cs||!bd||bd.hidden)return;if(bview=="tl")return renderTL(still);if(bview=="map")return;var p=g("pins"),sv=g("strings"),ck=g("cork"),from=still?notes.length:shown,L=links(notes),pts=[],i,el,d="",nk=0,pl=notes.length-from;
  p.innerHTML=notes.length?notes.map(function(t,i){var nw=i>=from;return '<div class="pin'+(nw?' new':'')+'" data-i="'+i+'" style="--r:'+(((i*37)%9-4)*.8)+'deg;--d:'+(nw?(i-from)*110:0)+'ms"><i class="tack"></i><span>'+esc(t)+'</span></div>'}).join(""):'<p class="empty">Gather clues to pin them here.</p>';
+ if(window.CFCards)CFCards.run();
  for(i=0;i<notes.length;i++){el=p.children[i];pts.push([p.offsetLeft+el.offsetLeft+el.offsetWidth/2,p.offsetTop+el.offsetTop+8])}
  L.forEach(function(e,k){var a=pts[e[0]],b=pts[e[1]],my=Math.max(a[1],b[1])+30+Math.abs(a[0]-b[0])*.06,nw=Math.max(e[0],e[1])>=from,dl=nw?(pl>0?pl*110:0)+350+(nk++)*130:0;
   d+='<path pathLength="1" class="'+(nw?'new':'')+'" data-a="'+e[0]+'" data-b="'+e[1]+'" style="--d:'+dl+'ms;--s:-'+(k*1.3).toFixed(1)+'s" d="M'+a[0]+" "+a[1]+" Q"+(a[0]+b[0])/2+" "+my+" "+b[0]+" "+b[1]+'"/>'});
@@ -77,7 +79,11 @@ function renderTL(still){var el=g("tl"),its=[],out="",from=still?notes.length:tl
  el.innerHTML=its.length?'<div class="tl-line"></div>'+out:'<p class="empty">Clues that mention a time appear here in order.</p>';
  g("bstat").textContent=its.length+" of "+notes.length+" clues have a timestamp";tlShown=notes.length;
  if(its.length>=5)checkAch({chrono:true})}
-function warp(c,fn){if(matchMedia("(prefers-reduced-motion:reduce)").matches){fn();return}var w=document.createElement("div");w.className="warp";w.style.setProperty("--c",worldOf(c).color);document.body.appendChild(w);setTimeout(fn,430);setTimeout(function(){w.remove()},1100)}
+function warp(c,fn,ev,card){if(matchMedia("(prefers-reduced-motion:reduce)").matches){fn();return}if(warp.on)return;warp.on=true;var w=document.createElement("div"),wd=worldOf(c),x=ev&&ev.clientX!=null?ev.clientX:innerWidth/2,y=ev&&ev.clientY!=null?ev.clientY:innerHeight/2;
+ w.className="warp";w.setAttribute("aria-hidden","true");w.style.setProperty("--c",wd.color);w.style.setProperty("--x",x+"px");w.style.setProperty("--y",y+"px");
+ w.innerHTML='<div class="wp-card"><span class="wp-ic">'+c.icon+'</span><small>'+esc(wd.icon+" "+wd.name)+' · case file</small><b>'+esc(c.title)+'</b><i>'+esc(c.place)+'</i><span class="wp-bar"></span></div>';
+ if(card)card.classList.add("opening");document.body.appendChild(w);
+ setTimeout(fn,640);setTimeout(function(){w.remove();warp.on=false;if(card)card.classList.remove("opening")},1700)}
 
 /* ===== case analysis: suspects, scene ownership, culprit, endings (feeds portraits, mood, gallery, epilogues) ===== */
 function rx(n){return new RegExp("\\b"+n.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b")}
@@ -107,10 +113,10 @@ function meta(c){if(M[c.id])return M[c.id];
  return M[c.id]={sus:sus,who:who,talk:talk,culprit:culprit,end:ends}}
 
 /* ===== suspect UI: portrait + mood meter ===== */
-function susHead(sid){var s=meta(cs).sus[sid];return '<div class="sus"><div id="fpt"></div><div class="si"><b>'+esc(s.name)+'</b>'+(s.role?'<i>'+esc(s.role)+'</i>':'')+'<div id="fmt"></div></div></div>'}
-function mountSus(sid){var s=meta(cs).sus[sid],k=cs.id+":"+sid;faceKey=k;face=CFPortrait.mount(g("fpt"),{id:k,name:s.name,size:88,mood:CFMood.mood(k)});meter=CFMood.mount(g("fmt"),k,{label:"Composure"})}
+function susHead(sid){var s=meta(cs).sus[sid];return '<div class="sus"><div class="si"><b>'+esc(s.name)+'</b>'+(s.role?'<i>'+esc(s.role)+'</i>':'')+'<div id="fmt"></div></div></div>'}
+function mountSus(sid){var s=meta(cs).sus[sid],k=cs.id+":"+sid;faceKey=k;meter=CFMood.mount(g("fmt"),k,{label:"Composure"})}
 function warn(sid,m){var n=meta(cs).sus[sid].name;return m=="angry"?n+"’s jaw tightens. One more push and they will stop talking.":n+" shifts uncomfortably. Keep pushing and they will stop talking."}
-function clam(sid){var s=meta(cs).sus[sid];g("sc").innerHTML=susHead(sid)+'<p id="txt" aria-hidden="true"></p><div class="ch"><button class="choice" data-to="'+cs.hub+'">'+esc(cs.hl)+'</button></div>';mountSus(sid);var t=s.name+": "+CFMood.clamLine();say(t);typeIn(g("txt"),t)}
+function clam(sid){var s=meta(cs).sus[sid];g("sc").innerHTML=susHead(sid)+'<p id="txt" aria-hidden="true"></p><div class="ch"><button class="choice" data-to="'+cs.hub+'">'+esc(cs.hl)+'</button></div>';mountSus(sid);var t=s.name+": "+CFMood.clamLine();say(t);typeIn(g("txt"),t);var W=meta(cs).who,sk=Object.keys(W).filter(function(k){return W[k]==sid})[0];if(sk)fire("cf:scene",{id:sk,sc:{t:"refuses to talk",f:"",i:cs.S[sk].i}})}
 document.addEventListener("cf:mood",function(e){if(face&&e.detail.id==faceKey)face.setMood(e.detail.mood)});
 document.addEventListener("cf:mood-recovered",function(e){var p=e.detail.id.split(":");if(cs&&p[0]==cs.id&&meta(cs).sus[p[1]])toast(meta(cs).sus[p[1]].name+" will talk again")});
 
@@ -120,7 +126,7 @@ function persist(){if(cs&&!ended&&curId!=null)CFSave.save(cs.id,{cur:curId,fl:fl
 function addNote(t){if(notes.indexOf(t)<0){notes.push(t);syncNotes();persist()}}
 function addStmt(r,k){atl.add({id:cs.id+"#"+k,who:r[1],about:r[2],start:r[3],end:r[4],place:r[5],text:r[6]})}
 document.addEventListener("cf:contradiction",function(e){if(!atl||!cs)return;var a=tlRows[+e.detail.a.split("#")[1]],b=tlRows[+e.detail.b.split("#")[1]];if(!a||!b)return;toast("Contradiction found");addNote("Contradiction: "+a[1]+" and "+b[1]+" disagree about "+a[2]+".")});
-function clearView(){stopType();if(epi){epi.destroy();epi=null}if(meter){meter.destroy();meter=null}if(gal){gal.destroy();gal=null}face=null}
+function clearView(){stopType();app.classList.remove("enter");if(epi){epi.destroy();epi=null}if(meter){meter.destroy();meter=null}if(gal){gal.destroy();gal=null}face=null}
 
 function renderProf(){var p=prof(),e=editing,n=C.filter(wins).length,r=RANK[Math.min(n,RANK.length-1)],en=C.reduce(function(t,c){return t+got(c).length},0),h,hv=ach();
  if(e||!p.name){h='<h2>Your detective profile</h2><div class="fields"><label>Name<input id="pn" maxlength="30" value="'+esc(p.name)+'"></label><label>Title or job<input id="pt" maxlength="40" value="'+esc(p.title)+'"></label><label>Motto<input id="pm" maxlength="60" value="'+esc(p.motto)+'"></label></div><p class="mute">Saved only in this browser. Avoid private details.</p><div class="btns"><button data-save="1">Save profile</button>'+(p.name?'<button data-cancel="1">Cancel</button>':'')+'</div>'}
@@ -134,7 +140,7 @@ function home(){clearView();cs=null;app.style.removeProperty("--acc");renderProf
  C.forEach(function(c){titles[c.id]=c.title});
  list.forEach(function(c,i){var lk=lockMsg(c),ld=STORY.leads[c.id],wd=worldOf(c);h+='<button class="folder'+(lk?' locked':'')+'" data-c="'+C.indexOf(c)+'" style="animation-delay:'+(i*80)+'ms;border-top-color:'+wd.color+'"><div class="fi">'+(lk?'🔒':c.icon)+'</div><h3>'+c.title+'</h3><p>'+c.place+'</p><p>'+wd.icon+' '+wd.name+' · '+c.level+'</p>'+(lk?'<p>'+esc(lk)+'</p>':'<p>Endings found: '+nsf(c)+' of '+total(c)+(sf(c)?' ★ secret found':'')+'</p>')+(ld?'<p>🪶 Connected to the final case: '+(lv.indexOf(c.id)>=0?'solved':'not yet')+'</p>':'')+(lk?'<span class="stamp new">LOCKED</span>':wins(c)?'<span class="stamp">SOLVED</span>':'<span class="stamp new">OPEN</span>')+'</button>'});
  app.innerHTML=h+'</div><p><button class="back" data-gal="1">★ Ending gallery</button></p>';
- CFSave.mountContinue(g("cont"),{titles:titles,onResume:function(id,sv){var i=idx(id);if(i>=0)openCase(i,sv)}})}
+ CFSave.mountContinue(g("cont"),{titles:titles,onResume:function(id,sv){var i=idx(id);if(i>=0)openCase(i,sv)}});fire("cf:home")}
 function gallery(){clearView();cs=null;app.style.removeProperty("--acc");app.innerHTML='<div class="top"><button class="back" data-home="1">← All cases</button></div><h1>Ending gallery</h1><p class="lead">Every case hides several endings. Locked ones show as silhouettes with a hint.</p><div id="gal"></div>';gal=CFEndings.mount(g("gal"));window.scrollTo(0,0)}
 function openCase(i,sv){clearView();cs=C[i];ci=i;ended=false;if(sv&&!cs.S[sv.cur])sv=null;
  fl=sv?sv.fl:{};notes=sv?sv.notes:[];shown=0;tlShown=0;bview="cork";curId=null;
@@ -145,7 +151,7 @@ function openCase(i,sv){clearView();cs=C[i];ci=i;ended=false;if(sv&&!cs.S[sv.cur
  app.innerHTML='<div class="top"><button class="back" data-home="1">← All cases</button><button class="back" data-restart="1">↺ Restart</button></div><h1>'+cs.icon+' '+cs.title+'</h1><div class="grid"><section class="panel" id="sc"></section><section class="panel"><h2>Notebook</h2><button class="bbtn" data-board="1">📌 Board &amp; timeline</button><ul id="notes"></ul><p id="none" class="mute">No clues yet.</p></section></div>'+(T?'<section class="panel" id="tlp"></section>':'')+'<section class="panel board" id="board" hidden><div class="tabs"><button class="on" data-view="cork">📌 Evidence board</button><button data-view="tl">🕒 Clue timeline</button></div><p class="mute" id="bstat"></p><div class="cork" id="cork"><svg id="strings" aria-hidden="true"></svg><div id="pins"></div></div><div class="tline" id="tl" hidden></div></section>';
  atl=T?CFTimeline.mount(g("tlp"),[],{title:"Alibi timeline"}):null;
  if(sv&&atl)tlRows.forEach(function(r,k){if(fl["v_"+r[0]])addStmt(r,k)});
- window.scrollTo(0,0);go(sv?sv.cur:cs.start,{restore:!!sv})}
+ fire("cf:case");window.scrollTo(0,0);go(sv?sv.cur:cs.start,{restore:!!sv})}
 function go(id,o){o=o||{};stopType();if(epi){epi.destroy();epi=null}if(meter){meter.destroy();meter=null}face=null;
  var m=meta(cs),sc=cs.S[id],sid=m.who[id],key=sid?cs.id+":"+sid:null;
  if(sid&&!o.restore&&!o.pre){
@@ -171,7 +177,7 @@ function go(id,o){o=o||{};stopType();if(epi){epi.destroy();epi=null}if(meter){me
  if(sid)mountSus(sid);
  if(sid&&AGG.test(id)&&!CFMood.canAsk(key))delete fl["v_"+id];
  var t=o.pre?o.pre+"\n\n"+sc.t:sc.t;
- say(t);typeIn(g("txt"),t);persist()}
+ say(t);typeIn(g("txt"),t);fire("cf:scene",{id:id,sc:sc});persist()}
 function ending(sc,id){var d=got(cs),co=STORY.leads[cs.id],win=sc.k=="win",nl=false,clean;
  ended=true;CFSave.clear(cs.id);
  if(d.indexOf(id)<0){d.push(id);st("cf2_"+cs.id,d)}
@@ -180,7 +186,8 @@ function ending(sc,id){var d=got(cs),co=STORY.leads[cs.id],win=sc.k=="win",nl=fa
  if(win){confetti();stamp(sc.s?"SECRET ENDING":"CASE CLOSED","ok")}else{flash();stamp(sc.k=="weak"?"NO CONVICTION":"WRONG CALL","no")}
  g("sc").innerHTML='<div class="ic" aria-hidden="true">'+(sc.i||"🏁")+'</div><h2>'+esc(sc.e)+'</h2><p class="endt" id="txt" aria-hidden="true"></p><div id="epi"></div>'+(win&&co?'<p class="coda"><b>Raven file.</b> '+esc(co.coda)+(nl?' <em>New lead added: '+leads().length+' of '+nLeads()+'.</em>':'')+'</p>':'')+'<p class="mute">Clues gathered: '+notes.length+'. Endings found: '+nsf(cs)+' of '+total(cs)+(sf(cs)?' plus a secret ★':'')+'.</p>'+(sc.s?'<p class="mute">★ Secret ending unlocked!</p>':'')+'<div class="ch"><button class="choice" data-restart="1">Replay and take a different path</button><button class="choice" data-home="1">All cases</button></div>';
  say(sc.e+". "+sc.t);
- typeIn(g("txt"),sc.t,function(){var el=g("epi");if(el)epi=CFEpilogue.show(el,cs.id,id,{type:sc.s?"secret":win?"good":sc.k=="weak"?"neutral":"bad",noButton:true})});
+ fire("cf:ending",{sc:sc,id:id});
+ typeIn(g("txt"),sc.t,function(){var el=document.querySelector(".cine .cepi")||g("epi");if(el)epi=CFEpilogue.show(el,cs.id,id,{type:sc.s?"secret":win?"good":sc.k=="weak"?"neutral":"bad",noButton:true})});
  renderProf();
  clean=!Object.keys(fl).some(function(k){return k.indexOf("v_")!==0&&/(gone|closed|burnt)$/.test(k)});
  checkAch({gentle:win&&clean,first:win&&att(cs)===1});
@@ -195,7 +202,7 @@ document.addEventListener("click",function(ev){var pp=g("pp");if(!pp.hidden&&!ev
  if(d.view){bview=d.view;g("cork").hidden=bview!="cork";g("tl").hidden=bview!="tl";Array.prototype.forEach.call(document.querySelectorAll(".tabs button"),function(x){x.classList.toggle("on",x.dataset.view==bview)});shown=0;tlShown=0;renderBoard();return}
  if(d.w){curW=d.w;home();return}
  if(d.board){var bd=g("board");bd.hidden=!bd.hidden;if(!bd.hidden){shown=0;tlShown=0}renderBoard();if(!bd.hidden)bd.scrollIntoView({block:"start"});return}
- if(d.c!==undefined){var k=C[+d.c],lm=lockMsg(k);if(lm){toast("🔒 "+lm);return}warp(k,function(){openCase(+d.c)});return}
+ if(d.c!==undefined){var k=C[+d.c],lm=lockMsg(k);if(lm){toast("🔒 "+lm);return}warp(k,function(){openCase(+d.c);app.classList.add("enter")},ev,b);return}
  if(d.gal){gallery();return}
  if(d.home){home();return}
  if(d.restart){openCase(ci);return}
@@ -210,5 +217,7 @@ C.forEach(function(c){var m=meta(c),map={};
  CFEndings.register(c.id,{title:c.title,endings:m.end.map(function(e){map[e.id]=e.lines;return {id:e.id,title:e.title,type:e.type,hint:e.hint}})});
  CFEpilogue.register(c.id,map);
  got(c).forEach(function(x){CFEndings.unlock(c.id,x)})});
+window.CF={C:C,state:function(){return{cs:cs,fl:fl}},wins:wins,worldOf:worldOf,has:has};
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){renderBoard(true)});
 renderProf();if(!prof().name)g("pp").hidden=false;home();
 })();
