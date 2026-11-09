@@ -9,5 +9,5 @@ document.addEventListener("cf:case",function(){var cs=CF.state().cs,n=name(cs),a
  a.dataset.theme=n;a.dataset.tex=CFArt.get(cs).tex||TEX[n]||"paper";document.body.dataset.theme=n;
  if(CF.worldOf(cs).id=="x")a.style.setProperty("--acc",ACC[n])});
 document.addEventListener("cf:home",function(){var a=document.getElementById("app");a.dataset.theme="home";a.dataset.tex="";document.body.dataset.theme="home";
- [].forEach.call(a.querySelectorAll(".folder"),function(f){var c=CF.C[+f.dataset.c],n=name(c);f.dataset.theme=n;if(CF.worldOf(c).id=="x")f.style.borderTopColor=ACC[n]})});
+});
 })();
