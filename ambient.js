@@ -7,9 +7,9 @@ function rnd(a,b){return a+Math.random()*(b-a)}
 function strike(){var x=W*rnd(.15,.85),y=0,p=[[x,0]];while(y<H*.6){y+=rnd(20,50);x+=rnd(-25,25);p.push([x,y])}p.again=Math.random()<.25;return p}
 function fill(n,f){P=[];for(var k=0;k<n;k++)P.push(f(k))}
 var FX={
-rain:{init:function(){fill(60,function(){return {x:rnd(-100,W+100),y:rnd(0,H),l:rnd(10,22),v:rnd(600,1000)}})},
- draw:function(dt){cx.strokeStyle="rgba(175,198,255,.2)";cx.lineWidth=1;cx.beginPath();
-  P.forEach(function(p){cx.moveTo(p.x,p.y);cx.lineTo(p.x-p.l*.25,p.y+p.l);p.y+=p.v*dt;p.x-=p.v*dt*.25;if(p.y>H){p.y=-30;p.x=rnd(-100,W+100)}});cx.stroke();
+rain:{init:function(){fill(64,function(){var n=Math.random()<.35;return {n:n,x:rnd(-100,W+100),y:rnd(0,H),l:n?rnd(16,26):rnd(8,14),v:n?rnd(900,1200):rnd(520,760)}})},
+ draw:function(dt){[0,1].forEach(function(n){cx.strokeStyle=n?"rgba(196,212,255,.24)":"rgba(160,186,240,.11)";cx.lineWidth=n?1.3:.8;cx.beginPath();
+  P.forEach(function(p){if(!!p.n!==!!n)return;cx.moveTo(p.x,p.y);cx.lineTo(p.x-p.l*.25,p.y+p.l);p.y+=p.v*dt;p.x-=p.v*dt*.25;if(p.y>H){p.y=-30;p.x=rnd(-100,W+100)}});cx.stroke()});
   nb-=dt;if(nb<=0){nb=rnd(16,32);flash=.5;bolt=strike()}
   if(flash>0){cx.fillStyle="rgba(205,218,255,"+(.1*flash).toFixed(3)+")";cx.fillRect(0,0,W,H);
    if(bolt){cx.strokeStyle="rgba(240,244,255,"+flash.toFixed(2)+")";cx.lineWidth=1.6;cx.beginPath();bolt.forEach(function(q,k){k?cx.lineTo(q[0],q[1]):cx.moveTo(q[0],q[1])});cx.stroke()}
@@ -39,7 +39,7 @@ function mk(){cv=document.createElement("canvas");cv.id="fxc";cv.setAttribute("a
 function run(){if(!raf&&on&&mode){t0=performance.now();raf=requestAnimationFrame(frame)}}
 function frame(ts){raf=0;if(!on||!mode){cx.clearRect(0,0,W,H);return}var dt=Math.min(.05,(ts-t0)/1000||0);t0=ts;cx.clearRect(0,0,W,H);FX[mode].draw(dt,ts/1000);raf=requestAnimationFrame(frame)}
 function sync(){btn.textContent=on?"✨":"🚫";btn.title="Ambient effects: "+(on?"on":"off");if(on)run();else cx.clearRect(0,0,W,H)}
-function set(m){if(RM)return;if(!cv)mk();mode=FX[m]?m:null;flash=0;bolt=null;nb=2;cx.clearRect(0,0,W,H);btn.hidden=!mode;if(mode){FX[mode].init();sync()}}
+function set(m){if(RM)return;if(!cv)mk();mode=FX[m]?m:null;flash=0;bolt=null;nb=2;cx.clearRect(0,0,W,H);btn.hidden=!mode;cv.classList.toggle("on",!!mode);if(mode){FX[mode].init();sync()}}
 document.addEventListener("cf:case",function(){set(CFArt.get(CF.state().cs).fx)});
 document.addEventListener("cf:home",function(){set(null)});
 })();

@@ -20,7 +20,7 @@ document.addEventListener("cf:ending",function(e){
   '<p class="cmeta" style="--sd:'+sd+'s">'+(st?esc(st.textContent):"")+'</p>'+
   '<div class="cbtn" style="--sd:'+sd+'s"><button class="choice" data-restart="1">Replay and take a different path</button><button class="choice" data-home="1">All cases</button></div></div>'+
   '<button class="cx" aria-label="Close ending screen">✕</button>';
- o.addEventListener("click",function(ev){if(ev.target.closest("[data-restart],[data-home]"))setTimeout(close,0);else if(ev.target.closest(".cx"))close()});
+ o.addEventListener("click",function(ev){if(ev.target.closest("[data-restart],[data-home]"))setTimeout(function(){if(o.isConnected){o.remove();document.dispatchEvent(new CustomEvent("cf:cine-close"))}},0);else if(ev.target.closest(".cx"))close()});
  document.body.appendChild(o)});
 document.addEventListener("cf:home",close);document.addEventListener("cf:case",close);
 document.addEventListener("keydown",function(e){if(e.key=="Escape")close()});

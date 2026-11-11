@@ -51,7 +51,9 @@ function say(m){g("live").textContent=m}
 function stopType(){if(tw){clearInterval(tw.id);tw=null}}
 function skipType(){if(tw){clearInterval(tw.id);tw.el.textContent=tw.t;var cb=tw.cb;tw=null;if(cb)cb()}}
 function typeIn(el,t,cb){stopType();if(matchMedia("(prefers-reduced-motion:reduce)").matches){el.textContent=t;if(cb)cb();return}var i=0;tw={el:el,t:t,cb:cb,id:setInterval(function(){i+=3;if(i>=t.length)skipType();else el.textContent=t.slice(0,i)},14)}}
-function confetti(){var d=document.createElement("div");d.className="cf";for(var i=0;i<36;i++){var s=document.createElement("span");s.textContent=["🎉","✨","🔍","⭐","💎"][i%5];s.style.left=Math.random()*100+"%";s.style.animationDelay=Math.random()*.8+"s";s.style.fontSize=(16+Math.random()*18)+"px";d.appendChild(s)}document.body.appendChild(d);setTimeout(function(){d.remove()},3500)}
+function confetti(){var d=document.createElement("div"),P=["#e3b95c","#5fb8aa","#d4574b","#7fd49a","#b98cff","#ffffff","#ff9f1c"],k,s,w;d.className="cf";d.setAttribute("aria-hidden","true");
+ for(k=0;k<72;k++){s=document.createElement("i");w=6+Math.random()*7;s.style.cssText="--c:"+P[k%P.length]+";--w:"+w.toFixed(1)+"px;--h:"+(w*(Math.random()<.5?1:2.2)).toFixed(1)+"px;--x:"+((Math.random()-.5)*46).toFixed(1)+"vw;--r:"+((Math.random()-.5)*1500).toFixed(0)+"deg;--t:"+(2.6+Math.random()*1.8).toFixed(2)+"s;--d:"+(Math.random()*.7).toFixed(2)+"s;left:"+(8+Math.random()*84).toFixed(1)+"%";if(k%5==0)s.className="st";d.appendChild(s)}
+ document.body.appendChild(d);setTimeout(function(){d.remove()},4600)}
 function stamp(t,c){var d=document.createElement("div");d.className="bigstamp "+c;d.textContent=t;document.body.appendChild(d);setTimeout(function(){d.remove()},2400)}
 function flash(){var q=document.createElement("div");q.className="fl";document.body.appendChild(q);setTimeout(function(){q.remove()},600)}
 function names(c){var s={};Object.keys(c.S).forEach(function(k){(c.S[k].c||[]).forEach(function(ch){if(/^(ac_|end_)/.test(ch[1]))ch[0].split(",")[0].split(/\s+/).forEach(function(w){if(/^[A-Z][a-z]/.test(w)&&!TITLES.test(w))s[w]=1})})});return Object.keys(s)}

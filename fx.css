@@ -151,3 +151,35 @@ body.cinematic .bigstamp{display:none}
 .cine .cepi{margin:6px 0 4px;text-align:left}
 .cine .cepi .cfx{background:transparent;box-shadow:none;padding:6px 2px;cursor:default;font-size:17px;gap:12px}
 .cine .cepi .cfx-hint{display:none}
+
+/* living scenery (twinkling stars, drifting clouds and fog) */
+.tw{animation:cf-twk 4.5s ease-in-out infinite alternate}
+.cl{animation:cf-cloud 70s ease-in-out infinite alternate}
+.fog{animation:cf-fog 28s ease-in-out infinite alternate}
+@keyframes cf-twk{from{opacity:.15}to{opacity:1}}
+@keyframes cf-cloud{to{transform:translateX(40px)}}
+@keyframes cf-fog{to{transform:translateX(-60px)}}
+
+/* bundled emoji icons */
+.emo{display:inline-block;width:1.08em;height:1.08em;vertical-align:-.17em;flex:none;pointer-events:none}
+.fi .emo,.ic .emo,.wp-ic .emo,.cicon .emo,.prop .emo{display:block;width:1em;height:1em;vertical-align:baseline}
+.oi .emo{width:.92em;height:.92em;vertical-align:baseline}
+
+/* polish: ambient fade, scenery breathing, card sheen, stamps, confetti, ending rays, press feedback */
+#fxc{opacity:0;transition:opacity 1.8s ease}
+#fxc.on{opacity:1}
+.stage .layer:nth-child(1) svg{animation:cf-breathe 24s ease-in-out infinite alternate}
+@keyframes cf-breathe{to{transform:scale(1.05)}}
+.folder{overflow:hidden}
+.folder::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.1) 50%,transparent 62%);transform:translateX(-130%);transition:transform .9s cubic-bezier(.2,.7,.2,1)}
+.folder:hover::after{transform:translateX(130%)}
+.stamp:not(.new){animation:cf-stampin .5s cubic-bezier(.2,1.6,.4,1) .45s backwards}
+@keyframes cf-stampin{from{opacity:0;transform:rotate(-18deg) scale(2.4)}}
+.choice:active{transform:scale(.985)!important}
+.cf i{position:absolute;top:-24px;width:var(--w);height:var(--h);background:var(--c);opacity:.95;border-radius:1px;animation:cf-conf var(--t) cubic-bezier(.2,.7,.35,1) var(--d) forwards}
+.cf i.st{height:var(--w);border-radius:0;clip-path:polygon(50% 0,62% 36%,100% 38%,70% 60%,80% 100%,50% 76%,20% 100%,30% 60%,0 38%,38% 36%)}
+@keyframes cf-conf{0%{transform:translate3d(0,0,0) rotate(0)}100%{transform:translate3d(var(--x),108vh,0) rotate(var(--r));opacity:0}}
+.cine .grade{overflow:hidden}
+.cine.k-master .grade::before,.cine.k-win .grade::before,.cine.k-secret .grade::before{content:"";position:absolute;left:50%;top:36%;width:170vmax;height:170vmax;margin:-85vmax 0 0 -85vmax;background:repeating-conic-gradient(from 0deg,var(--ray,rgba(255,225,150,.08)) 0 6deg,transparent 6deg 18deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 55%);mask:radial-gradient(circle,#000 0,transparent 55%);animation:cf-spin 70s linear infinite}
+.cine.k-win .grade{--ray:rgba(127,212,154,.09)}
+.cine.k-secret .grade{--ray:rgba(185,140,255,.1)}

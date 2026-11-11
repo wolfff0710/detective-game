@@ -2,13 +2,15 @@
    Override per case by adding  art:{pal:[..4 hex..],sky,mid,fore,fx,theme,tex,flip,people:{Name:{skin,hair,ac,style}}}  to a case file. */
 (function(){
 "use strict";
-var uid=0;
+var uid=0,CUR=0;
+function hx(h){h=h.replace("#","");if(h.length==3)h=h.replace(/./g,"$&$&");return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]}
+function mix(a,b,t){var x=hx(a),y=hx(b);return "#"+[0,1,2].map(function(i){return ("0"+Math.round(x[i]+(y[i]-x[i])*t).toString(16)).slice(-2)}).join("")}
 function rnd(s){return function(){s=(s*9301+49297)%233280;return s/233280}}
 function seed(t){var h=7;for(var i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))%233280;return h||1}
 function R(x,y,w,h,f,o){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+f+'"'+(o||"")+'/>'}
 function P(d,f,o){return '<path d="'+d+'" fill="'+f+'"'+(o||"")+'/>'}
 function C(x,y,r,f,o){return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+f+'"'+(o||"")+'/>'}
-function W(l,w,h,f){return l.map(function(p){return R(p[0],p[1],w,h,f,' opacity="'+(((p[0]*7+p[1]*13)%5)?.9:.25)+'"')}).join("")}
+function W(l,w,h,f){var o=l.map(function(p){return R(p[0],p[1],w,h,f,' opacity="'+(((p[0]*7+p[1]*13)%5)?.9:.25)+'"')}).join("");return CUR?'<g filter="url(#gl'+CUR+')">'+o+"</g>":o}
 function G(x,y,c,r,dx,dy,w,h,f){var l=[],i,j;for(j=0;j<r;j++)for(i=0;i<c;i++)l.push([x+i*dx,y+j*dy]);return W(l,w,h,f)}
 
 /* pal = [skyTop, skyBottom, accent, ground/silhouette] */
@@ -34,11 +36,12 @@ mirror:{theme:"rift",flip:1,pal:["#14082a","#5a2a8a","#b98cff","#0a0414"],sky:"r
 };
 
 function sky(a){var p=a.pal,id="cg"+(++uid),r=rnd(seed(a.id||"x")),t=a.sky,o="",i,n;
- o+='<defs><linearGradient id="'+id+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+p[0]+'"/><stop offset="1" stop-color="'+p[1]+'"/></linearGradient></defs>'+R(0,0,400,240,"url(#"+id+")");
- if(/night|space|dusk|aurora|rift/.test(t)){n=t=="space"?90:t=="dusk"?18:50;for(i=0;i<n;i++)o+=C((r()*400).toFixed(0),(r()*(t=="dusk"?80:150)).toFixed(0),(.5+r()*1.1).toFixed(1),"#fff",' opacity="'+(.3+r()*.6).toFixed(2)+'"')}
- if(t=="night"||t=="dusk")o+=C(322,46,15,"#f4f1de",' opacity=".95"')+C(327,42,13,p[0],' opacity=".35"');
+ o+='<defs><linearGradient id="'+id+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+p[0]+'"/><stop offset="1" stop-color="'+p[1]+'"/></linearGradient><radialGradient id="mh'+id+'"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><radialGradient id="hz'+id+'"><stop offset="0" stop-color="'+p[2]+'" stop-opacity=".34"/><stop offset="1" stop-color="'+p[2]+'" stop-opacity="0"/></radialGradient></defs>'+R(0,0,400,240,"url(#"+id+")");
+ if(!/day|space|none/.test(t))o+='<ellipse cx="200" cy="200" rx="300" ry="96" fill="url(#hz'+id+')"/>';
+ if(/night|space|dusk|aurora|rift/.test(t)){n=t=="space"?90:t=="dusk"?18:50;for(i=0;i<n;i++)o+=C((r()*400).toFixed(0),(r()*(t=="dusk"?80:150)).toFixed(0),(.5+r()*1.1).toFixed(1),"#fff",' opacity="'+(.3+r()*.6).toFixed(2)+'"'+(i%3==0?' class="tw" style="animation-delay:-'+(r()*5).toFixed(1)+'s"':""))}
+ if(t=="night"||t=="dusk")o+=C(322,46,54,"url(#mh"+id+")")+C(322,46,15,"#f4f1de",' opacity=".95"')+C(327,42,13,p[0],' opacity=".35"');
  if(t=="space")o+=C(320,64,40,p[1],' opacity=".9"')+'<ellipse cx="320" cy="64" rx="64" ry="9" fill="none" stroke="'+p[2]+'" stroke-opacity=".5" stroke-width="3" transform="rotate(-18 320 64)"/>';
- if(t=="day"){o+=C(332,44,22,"#fff6b8",' opacity=".95"');for(i=0;i<4;i++)o+='<ellipse cx="'+(60+i*95+r()*30).toFixed(0)+'" cy="'+(36+r()*50).toFixed(0)+'" rx="'+(30+r()*16).toFixed(0)+'" ry="'+(8+r()*5).toFixed(0)+'" fill="#fff" opacity=".85"/>'}
+ if(t=="day"){o+=C(332,44,22,"#fff6b8",' opacity=".95"');for(i=0;i<4;i++)o+='<ellipse cx="'+(60+i*95+r()*30).toFixed(0)+'" cy="'+(36+r()*50).toFixed(0)+'" rx="'+(30+r()*16).toFixed(0)+'" ry="'+(8+r()*5).toFixed(0)+'" fill="#fff" opacity=".85" class="cl" style="animation-delay:-'+(r()*30).toFixed(0)+'s"/>'}
  if(t=="dawn")o+=C(200,166,60,p[2],' opacity=".5"')+C(200,166,34,p[2],' opacity=".9"');
  if(t=="storm")for(i=0;i<6;i++)o+='<ellipse cx="'+(i*75)+'" cy="'+(30+r()*40).toFixed(0)+'" rx="'+(70+r()*30).toFixed(0)+'" ry="'+(22+r()*10).toFixed(0)+'" fill="#05060c" opacity=".7"/>';
  if(t=="aurora")o+=P("M0 80Q100 20 200 70T400 50V110Q300 130 200 100T0 120Z",p[2],' opacity=".28"')+P("M0 110Q120 60 220 100T400 80V130Q300 150 200 125T0 140Z","#b98cff",' opacity=".2"');
@@ -77,7 +80,11 @@ none:function(){return ""}
 };
 
 function norm(d,id){var o={},k;for(k in d)o[k]=d[k];o.id=id;o.pal=o.pal||["#0a1114","#26373d","#5fb8aa","#0b0f12"];o.sky=o.sky||"night";o.mid=o.mid||"hall";o.fore=o.fore||"floor";return o}
-function parts(a){return [sky(a),(MID[a.mid]||MID.hall)(a),(FORE[a.fore]||FORE.none)(a)]}
+function parts(a){var id=++uid,p=a.pal,sk,m,f,fog="";CUR=id;sk=sky(a);m=(MID[a.mid]||MID.hall)(a);CUR=0;f=(FORE[a.fore]||FORE.none)(a);
+ m=m.replace(new RegExp('fill="'+p[3]+'"',"gi"),'fill="url(#sil'+id+')"');
+ m='<defs><linearGradient id="sil'+id+'" gradientUnits="userSpaceOnUse" x1="0" y1="30" x2="0" y2="180"><stop offset="0" stop-color="'+mix(p[3],p[1],.3)+'"/><stop offset=".55" stop-color="'+mix(p[3],p[1],.08)+'"/><stop offset="1" stop-color="'+p[3]+'"/></linearGradient><filter id="gl'+id+'" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>'+m;
+ if(a.fore!="none"&&a.sky!="space"){fog='<defs><radialGradient id="fg'+id+'"><stop offset="0" stop-color="'+mix(p[1],"#ffffff",.55)+'" stop-opacity=".30"/><stop offset="1" stop-color="'+mix(p[1],"#ffffff",.55)+'" stop-opacity="0"/></radialGradient></defs><g class="fog"><ellipse cx="70" cy="176" rx="190" ry="20" fill="url(#fg'+id+')"/><ellipse cx="250" cy="170" rx="210" ry="16" fill="url(#fg'+id+')"/><ellipse cx="380" cy="178" rx="150" ry="18" fill="url(#fg'+id+')"/></g>'}
+ return [sk,m,fog+f]}
 function svg(inner,flip){return '<svg viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">'+(flip?'<g transform="translate(400 0) scale(-1 1)">'+inner+'</g>':inner)+'</svg>'}
 
 window.CFArt={

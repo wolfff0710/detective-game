@@ -10,7 +10,9 @@ M={neutral:{e:4.2,p:0,bl:[42,43,55,43],br:[65,43,78,43],m:"M52 70L68 70"},
  sad:{e:3.6,p:0,bl:[42,46,55,41],br:[65,41,78,46],m:"M53 74Q60 68 67 74"},
  nervous:{e:5.2,p:2,bl:[42,39,55,38],br:[65,38,78,39],m:"M51 71Q55.5 68 60 71T69 71"},
  smug:{e:2.8,p:1.5,bl:[42,43,55,44],br:[65,38,78,41],m:"M52 71Q62 74 70 65"}},
-cache={};
+cache={},fu=0;
+function lite(c,t){var h=c.replace('#','');var n=[0,2,4].map(function(i){var v=parseInt(h.slice(i,i+2),16);return ('0'+Math.round(v+(255-v)*t).toString(16)).slice(-2)});return '#'+n.join('')}
+function dark(c,t){var h=c.replace('#','');var n=[0,2,4].map(function(i){var v=parseInt(h.slice(i,i+2),16);return ('0'+Math.round(v*(1-t)).toString(16)).slice(-2)});return '#'+n.join('')}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function hs(s){var h=5381;for(var i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return h}
 function any(e,l){return l.some(function(x){return e.indexOf(x)>=0})}
@@ -31,8 +33,8 @@ function hint(e){var o={};e=e||"";
  if(any(e,["👨‍🍳","🍵","🍲"]))o.ac="chef";
  if(any(e,["🎧","🧑‍💻","🎮"]))o.ac="headset";
  return o}
-function params(name,emoji,ov){var h=hs(name),o=hint(emoji),p={skin:SK[h%5],hair:HC[(h>>3)%6],cloth:CL[(h>>6)%7],style:ST[(h>>9)%6],ac:AC[(h>>12)%6],big:1},k;
- if(o.f){p.style=["long","bun","long","side"][(h>>4)%4];if(p.ac=="beard")p.ac="none"}else if(p.style=="long")p.style="short";
+function params(name,emoji,ov){var h=hs(name),o=hint(emoji),p={skin:SK[h%5],hair:HC[(h>>>3)%6],cloth:CL[(h>>>6)%7],style:ST[(h>>>9)%6],ac:AC[(h>>>12)%6],big:1},k;
+ if(o.f){p.style=["long","bun","long","side"][(h>>>4)%4];if(p.ac=="beard")p.ac="none"}else if(p.style=="long")p.style="short";
  if(o.old)p.hair="#bdbdbd";
  if(o.child){p.big=.88;p.style="short";p.ac="none"}
  if(o.ac)p.ac=o.ac;if(o.robot)p.robot=1;
@@ -43,10 +45,10 @@ function robot(m){var c={neutral:"#59e1ff",soft:"#7cffb2",angry:"#ff5252",sad:"#
 
 function face(p,m,name){var d=M[m]||M.neutral,k="#1b1410",s=p.skin,hc=p.hair,bc=(hc=="#bdbdbd"||hc=="#d8b25a")?"#6a5a45":hc,o='<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+esc(name)+'">',st=p.style;
  if(p.robot)return o+robot(m)+'</svg>';
- o+='<g transform="translate(60 120) scale('+p.big+') translate(-60 -120)">';
+ var u=++fu;o+='<defs><radialGradient id="sk'+u+'" cx=".42" cy=".34" r=".8"><stop offset="0" stop-color="'+lite(s,.2)+'"/><stop offset=".6" stop-color="'+s+'"/><stop offset="1" stop-color="'+dark(s,.16)+'"/></radialGradient><linearGradient id="cl'+u+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+lite(p.cloth,.12)+'"/><stop offset="1" stop-color="'+dark(p.cloth,.3)+'"/></linearGradient></defs>';o+='<g transform="translate(60 120) scale('+p.big+') translate(-60 -120)">';
  if(st=="long")o+=P("M30 50Q22 100 38 106L82 106Q98 100 90 50Z",hc);
- o+=P("M12 120Q14 90 46 86H74Q106 90 108 120Z",p.cloth)+P("M50 86L60 102L70 86Z","#eee")+R(52,76,16,14,s,' rx="4"')+R(52,76,16,14,"#000",' rx="4" opacity=".14"')+C(33,54,4.5,s)+C(87,54,4.5,s)+'<ellipse cx="60" cy="52" rx="27" ry="31" fill="'+s+'"/>';
- [49,71].forEach(function(x){o+='<ellipse cx="'+x+'" cy="52" rx="5" ry="'+d.e+'" fill="#fff"/>'+C(x+d.p,52,Math.min(2.4,d.e-.4),k)});
+ o+=P("M12 120Q14 90 46 86H74Q106 90 108 120Z",'url(#cl'+u+')')+P("M50 86L60 102L70 86Z","#eee")+R(52,76,16,14,s,' rx="4"')+R(52,76,16,14,"#000",' rx="4" opacity=".14"')+C(33,54,4.5,s)+C(87,54,4.5,s)+'<ellipse cx="60" cy="52" rx="27" ry="31" fill="url(#sk'+u+')"/><path d="M34 60Q36 82 60 84Q84 82 86 60Q82 74 60 76Q38 74 34 60Z" fill="#000" opacity=".09"/>';
+ [49,71].forEach(function(x){o+='<ellipse cx="'+x+'" cy="52" rx="5" ry="'+d.e+'" fill="#fff"/>'+C(x+d.p,52,Math.min(2.4,d.e-.4),k)+C(x+d.p-.8,51.1,.85,"#fff")+'<path d="M'+(x-5.4)+' '+(52-d.e+.5)+'Q'+x+' '+(52-d.e-1.8)+' '+(x+5.4)+' '+(52-d.e+.5)+'" stroke="#000" stroke-opacity=".34" stroke-width="1.2" fill="none"/>'});
  o+='<path d="M'+d.bl[0]+' '+d.bl[1]+'L'+d.bl[2]+' '+d.bl[3]+'M'+d.br[0]+' '+d.br[1]+'L'+d.br[2]+' '+d.br[3]+'" stroke="'+bc+'" stroke-width="2.8" stroke-linecap="round" fill="none"/>';
  o+='<path d="M60 54Q57 62 61 63" stroke="#000" stroke-opacity=".28" stroke-width="1.6" stroke-linecap="round" fill="none"/>';
  if(m=="angry")o+='<ellipse cx="41" cy="63" rx="5" ry="3" fill="#e05a4a" opacity=".35"/><ellipse cx="79" cy="63" rx="5" ry="3" fill="#e05a4a" opacity=".35"/>';
@@ -57,6 +59,7 @@ function face(p,m,name){var d=M[m]||M.neutral,k="#1b1410",s=p.skin,hc=p.hair,bc=
  if(st=="short"||st=="bun"||st=="long"||st=="curly")o+=P("M33 50Q30 20 60 19Q90 20 87 50Q80 34 60 33Q40 34 33 50Z",hc);
  if(st=="side")o+=P("M32 52Q28 18 62 18Q92 20 88 46Q70 30 46 36Q38 40 32 52Z",hc);
  if(st=="bun")o+=C(60,14,9,hc);
+ o+='<path d="M34 50Q60 38 86 50Q78 41 60 40Q42 41 34 50Z" fill="#000" opacity=".1"/><path d="M41 29Q60 20 80 30" stroke="#fff" stroke-opacity=".17" stroke-width="3" stroke-linecap="round" fill="none"/>';
  if(st=="curly")[[36,40],[42,26],[54,20],[66,20],[78,26],[84,40]].forEach(function(q){o+=C(q[0],q[1],11,hc)});
  var a=p.ac;
  if(a=="glasses")o+='<circle cx="49" cy="52" r="8" fill="#fff" fill-opacity=".12" stroke="#222" stroke-width="2"/><circle cx="71" cy="52" r="8" fill="#fff" fill-opacity=".12" stroke="#222" stroke-width="2"/><path d="M57 52H63" stroke="#222" stroke-width="2"/>';
